@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimarket</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+    <nav>
+        <div class="logo">
+            <a href="/">
+                <img src="img/logo.png" alt="Logo MAXMARKET" class="logo-img">
+                <span>MAXMARKET</span>
+            </a>
+        </div>
+        <ul>
+            <li><a href="/">Inicio</a></li>
+            <% if (typeof user !== 'undefined') { %>
+                <li><a href="/dashboard">Administrar</a></li>
+                <li><a href="/auth/logout">Salir</a></li>
+            <% } else { %>
+                <li><a href="/auth/login">Iniciar Sesión</a></li>
+            <% } %>
+        </ul>
+    </nav>
+</header>

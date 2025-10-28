@@ -1,0 +1,13 @@
+<%- include('partials/header') %>
+<main class="landing">
+    <div class="hero">
+        <h1>Bienvenido a MAXMARKET</h1>
+        <p>Venta de abarrotes en general</p>
+        <% if (typeof user !== 'undefined' && user) { %>
+            <a href="/dashboard" class="btn">Iniciar</a>
+        <% } else { %>
+            <a href="/auth/login" class="btn">Iniciar</a>
+        <% } %>
+    </div>
+</main>
+<%- include('partials/footer') %>
