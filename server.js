@@ -3,6 +3,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const session = require('express-session');
+const cookieParser = require('cookie-parser');
 
 // Load config
 dotenv.config();
@@ -15,6 +16,9 @@ const app = express();
 // Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Cookies
+app.use(cookieParser());
 
 // Session middleware
 app.use(session({
@@ -33,6 +37,7 @@ app.set('view engine', 'ejs');
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
 app.use('/products', require('./routes/products'));
+app.use('/api', require('./routes/api'));
 
 const PORT = process.env.PORT || 3000;
 

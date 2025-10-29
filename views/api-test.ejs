@@ -1,0 +1,123 @@
+<%- include('partials/header') %>
+<main class="dashboard">
+    <h2>API Test - Autenticación JWT</h2>
+    <div class="dashboard-content">
+        <div class="user-info">
+            <h3>Prueba de Endpoints API</h3>
+            <p>Esta página demuestra el uso de la API con autenticación JWT</p>
+        </div>
+        
+        <div class="api-section">
+            <h3>Endpoints Disponibles</h3>
+            <div class="api-buttons">
+                <button class="btn" onclick="testProfile()">Obtener Perfil</button>
+                <button class="btn" onclick="testProducts()">Obtener Productos</button>
+                <button class="btn" onclick="testCart()">Agregar al Carrito</button>
+                <button class="btn" onclick="testLogout()">Logout</button>
+            </div>
+        </div>
+        
+        <div class="api-results">
+            <h3>Resultados</h3>
+            <pre id="apiResults">Haz clic en un botón para probar la API...</pre>
+        </div>
+    </div>
+</main>
+
+<script>
+// Funciones de prueba para la API
+async function testProfile() {
+    try {
+        const response = await window.authManager.authenticatedFetch('/api/profile');
+        const data = await response.json();
+        document.getElementById('apiResults').textContent = JSON.stringify(data, null, 2);
+    } catch (error) {
+        document.getElementById('apiResults').textContent = 'Error: ' + error.message;
+    }
+}
+
+async function testProducts() {
+    try {
+        const response = await window.authManager.authenticatedFetch('/api/products');
+        const data = await response.json();
+        document.getElementById('apiResults').textContent = JSON.stringify(data, null, 2);
+    } catch (error) {
+        document.getElementById('apiResults').textContent = 'Error: ' + error.message;
+    }
+}
+
+async function testCart() {
+    try {
+        const response = await window.authManager.authenticatedFetch('/api/cart/add', {
+            method: 'POST',
+            body: JSON.stringify({
+                productId: '507f1f77bcf86cd799439011',
+                quantity: 2
+            })
+        });
+        const data = await response.json();
+        document.getElementById('apiResults').textContent = JSON.stringify(data, null, 2);
+    } catch (error) {
+        document.getElementById('apiResults').textContent = 'Error: ' + error.message;
+    }
+}
+
+async function testLogout() {
+    try {
+        await window.authManager.logout();
+    } catch (error) {
+        document.getElementById('apiResults').textContent = 'Error: ' + error.message;
+    }
+}
+
+// Verificar autenticación al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    if (!window.authManager.isAuthenticated()) {
+        alert('Debes iniciar sesión para acceder a esta página');
+        window.location.href = '/auth/login';
+    }
+});
+</script>
+
+<style>
+.api-section {
+    background: var(--blanco);
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.api-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+}
+
+.api-buttons .btn {
+    flex: 1;
+    min-width: 150px;
+}
+
+.api-results {
+    background: var(--gris-claro);
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+#apiResults {
+    background: var(--blanco);
+    border: 1px solid var(--gris-medio);
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    max-height: 400px;
+    overflow-y: auto;
+}
+</style>
+
+<%- include('partials/footer') %>

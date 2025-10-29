@@ -28,4 +28,9 @@ router.get('/dashboard', protect, (req, res) => {
   }
 });
 
+// Página de prueba para API JWT
+router.get('/api-test', protect, (req, res) => {
+  res.render('api-test', { user: req.session.user });
+});
+
 module.exports = router;

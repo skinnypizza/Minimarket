@@ -118,6 +118,57 @@ small {
     font-size: 0.8rem;
 }
 
+/* Alertas en formularios */
+.alert {
+    padding: 0.9rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+.alert-error {
+    background: #fdecea;
+    color: #b00020;
+    border: 1px solid #f5c6cb;
+}
+
+/* Estilos para gestión de administradores */
+.admin-management {
+    background: linear-gradient(135deg, var(--verde-muy-claro) 0%, var(--blanco) 100%);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 5px solid var(--verde-oscuro);
+    box-shadow: 0 4px 12px rgba(82, 183, 136, 0.08);
+}
+
+.admin-management h4 {
+    color: var(--verde-oscuro);
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.admin-management p {
+    color: var(--gris-oscuro);
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+.admin-management .btn {
+    background: linear-gradient(135deg, var(--verde-oscuro) 0%, var(--verde-pastel-3) 100%);
+    color: var(--blanco);
+    text-decoration: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.admin-management .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(82, 183, 136, 0.3);
+}
+
 nav ul {
     display: flex;
     list-style: none;
