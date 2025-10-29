@@ -8,13 +8,13 @@
         <div class="footer-content">
             <!-- Sección 1: Información de Contacto -->
             <div class="footer-section">
-                <h3>📍 Información de Contacto</h3>
+                <h3>📍 Contacto</h3>
                 <div class="contact-info">
                     <div class="contact-item">
                         <i class="fas fa-map-marker-alt"></i>
                         <div>
                             <strong>Dirección:</strong>
-                            <span>Calle Santa Rosa Nº 471<br>Villa Fátima, La Paz<br>Bolivia</span>
+                            <span>Calle Santa Rosa Nº 471<br>Villa Fátima, La Paz - Bolivia</span>
                         </div>
                     </div>
                     <div class="contact-item">
@@ -31,28 +31,28 @@
                             <a href="mailto:info@maxmarket.com">info@maxmarket.com</a>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Sección 2: Horario y Llamada -->
+            <div class="footer-section">
+                <h3>⏰ Horario</h3>
+                <div class="contact-info">
                     <div class="contact-item">
                         <i class="fas fa-clock"></i>
                         <div>
-                            <strong>Horario:</strong>
+                            <strong>Atención:</strong>
                             <span>Lunes a Domingo<br>8:00 AM - 8:00 PM</span>
                         </div>
                     </div>
                 </div>
+                <a href="tel:+591234567890" class="phone-btn">
+                    <i class="fas fa-phone"></i>
+                    Llamar Ahora
+                </a>
             </div>
 
-            <!-- Sección 2: Formulario de Contacto -->
-            <div class="footer-section">
-                <h3>✉️ Envíanos un Mensaje</h3>
-                <form class="contact-form">
-                    <input type="text" placeholder="Tu nombre" required>
-                    <input type="email" placeholder="Tu correo" required>
-                    <textarea placeholder="Tu mensaje..." required></textarea>
-                    <button type="submit">Enviar Mensaje</button>
-                </form>
-            </div>
-
-            <!-- Sección 3: Redes Sociales y Call to Action -->
+            <!-- Sección 3: Redes Sociales -->
             <div class="footer-section">
                 <h3>🌐 Síguenos</h3>
                 <div class="social-links">
@@ -69,27 +69,23 @@
                         <i class="fab fa-tiktok"></i>
                     </a>
                 </div>
+            </div>
 
-                <div class="call-to-action">
-                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.8rem; font-size: 1rem;">Llamar Ahora</h4>
-                    <a href="tel:+591234567890" class="phone-btn">
-                        <i class="fas fa-phone"></i>
-                        Llamar: +591 2 345-6789
-                    </a>
-                </div>
+            <!-- Sección 4: Formulario de Contacto -->
+            <div class="footer-section">
+                <h3>✉️ Mensaje</h3>
+                <form class="contact-form" onsubmit="event.preventDefault(); alert('Mensaje enviado exitosamente');">
+                    <input type="text" placeholder="Nombre" required>
+                    <input type="email" placeholder="Correo" required>
+                    <textarea placeholder="Mensaje..." required></textarea>
+                    <button type="submit">Enviar</button>
+                </form>
             </div>
         </div>
 
         <!-- Footer Bottom -->
         <div class="footer-bottom">
-            <div class="footer-links">
-                <a href="#">Política de Privacidad</a>
-                <a href="#">Términos y Condiciones</a>
-                <a href="#">Preguntas Frecuentes</a>
-                <a href="#">Contacto</a>
-            </div>
             <p>&copy; 2025 MAXMARKET. Todos los derechos reservados.</p>
-            <p style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.7);">MaxMarket - Tu minimarket de confianza en La Paz, Bolivia</p>
         </div>
     </div>
 </footer>

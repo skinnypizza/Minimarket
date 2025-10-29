@@ -55,6 +55,69 @@ nav {
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
+.logo a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--blanco);
+}
+
+.logo-img {
+    height: 40px;
+    margin-right: 10px;
+    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.15));
+    transition: transform 0.3s ease;
+}
+
+.logo-img:hover {
+    transform: scale(1.05);
+}
+
+/* Estilos adicionales para imágenes de productos */
+.product-image-admin {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 2px solid var(--gris-claro);
+}
+
+.no-image-admin {
+    width: 50px;
+    height: 50px;
+    background: var(--gris-claro);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gris-medio);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+/* Estilos para formularios de archivos */
+input[type="file"] {
+    width: 100%;
+    padding: 0.5rem;
+    border: 2px solid var(--gris-medio);
+    border-radius: 8px;
+    background-color: var(--blanco);
+    font-size: 0.9rem;
+}
+
+input[type="file"]:focus {
+    outline: none;
+    border-color: var(--verde-pastel-2);
+    box-shadow: 0 0 0 3px rgba(168, 212, 199, 0.2);
+}
+
+small {
+    display: block;
+    margin-top: 0.3rem;
+    color: var(--gris-oscuro);
+    font-size: 0.8rem;
+}
+
 nav ul {
     display: flex;
     list-style: none;
@@ -338,7 +401,7 @@ summary::marker {
     content: '';
 }
 
-/* Carrusel de productos */
+/* CARRUSEL DE PRODUCTOS */
 .product-carousel {
     padding: 2rem 0;
     position: relative;
@@ -351,38 +414,68 @@ summary::marker {
     transition: transform 0.5s ease;
     gap: 1.5rem;
     padding: 1rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+}
+
+.carousel-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.carousel-container::-webkit-scrollbar-track {
+    background: var(--gris-claro);
+    border-radius: 10px;
+}
+
+.carousel-container::-webkit-scrollbar-thumb {
+    background: var(--verde-pastel-2);
+    border-radius: 10px;
+}
+
+.carousel-container::-webkit-scrollbar-thumb:hover {
+    background: var(--verde-pastel-3);
 }
 
 .product-card {
     min-width: 250px;
     background: var(--blanco);
     border-radius: 15px;
-    padding: 1rem;
+    padding: 1.5rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
+    border: 2px solid transparent;
 }
 
 .product-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 24px rgba(82, 183, 136, 0.15);
+    border-color: var(--verde-pastel-2);
 }
 
 .product-card h4 {
     color: var(--verde-oscuro);
     margin: 0.5rem 0;
     font-size: 1.2rem;
+    font-weight: 600;
 }
 
 .product-card p {
     color: var(--gris-oscuro);
     margin-bottom: 1rem;
     font-size: 0.9rem;
+    line-height: 1.4;
 }
 
 .product-card .price {
     color: var(--verde-pastel-3);
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.product-card .stock {
+    font-size: 0.85rem;
+    color: var(--gris-medio);
     margin-bottom: 1rem;
 }
 
@@ -394,16 +487,26 @@ summary::marker {
     color: var(--blanco);
     border: none;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     cursor: pointer;
     opacity: 0.8;
     transition: all 0.3s ease;
+    z-index: 10;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .carousel-btn:hover {
     opacity: 1;
     transform: translateY(-50%) scale(1.1);
+    background: var(--verde-pastel-2);
+}
+
+.carousel-btn:active {
+    transform: translateY(-50%) scale(0.95);
 }
 
 .carousel-btn.prev {
@@ -414,7 +517,7 @@ summary::marker {
     right: 1rem;
 }
 
-/* Carrito de compras */
+/* CARRITO DE COMPRAS */
 .cart-section {
     background: var(--blanco);
     border-radius: 15px;
@@ -467,6 +570,7 @@ summary::marker {
 
 .quantity-btn:hover {
     background: var(--verde-pastel-3);
+    transform: scale(1.1);
 }
 
 .cart-total {
@@ -511,22 +615,274 @@ summary::marker {
     justify-content: center;
 }
 
-/* Footer */
+/* FOOTER HORIZONTAL PROFESIONAL */
 footer {
-    text-align: center;
-    padding: 1.5rem;
     background: linear-gradient(135deg, var(--verde-oscuro) 0%, var(--verde-pastel-2) 100%);
     color: var(--blanco);
+    padding: 2rem 2rem 1.5rem;
     margin-top: 3rem;
     box-shadow: 0 -4px 6px rgba(82, 183, 136, 0.1);
 }
 
-footer p {
-    font-size: 0.95rem;
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-/* Responsive */
+/* Mapa de ubicación */
+.location-map {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    margin-bottom: 2rem;
+}
+
+.location-map iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Grid horizontal con 4 columnas */
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Secciones del footer */
+.footer-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1.2rem;
+    color: var(--blanco);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    padding-bottom: 0.8rem;
+    font-weight: 600;
+}
+
+/* Información de contacto */
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+}
+
+.contact-item i {
+    font-size: 1.2rem;
+    color: var(--verde-muy-claro);
+    margin-top: 0.2rem;
+    min-width: 25px;
+}
+
+.contact-item div {
+    display: flex;
+    flex-direction: column;
+}
+
+.contact-item strong {
+    font-weight: 600;
+    color: var(--blanco);
+    font-size: 0.9rem;
+}
+
+.contact-item span {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.contact-item a {
+    color: var(--verde-muy-claro);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.contact-item a:hover {
+    color: var(--blanco);
+    text-decoration: underline;
+}
+
+/* Botón de llamada */
+.phone-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1.2rem;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+    color: var(--blanco);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-top: 0.8rem;
+}
+
+.phone-btn i {
+    font-size: 1.1rem;
+    animation: ring 2s infinite;
+}
+
+@keyframes ring {
+    0%, 100% { transform: rotate(0deg); }
+    10%, 20% { transform: rotate(-15deg); }
+    30%, 50%, 70%, 90% { transform: rotate(15deg); }
+    40%, 60%, 80% { transform: rotate(-15deg); }
+}
+
+.phone-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(255, 107, 107, 0.4);
+}
+
+/* Redes sociales */
+.social-links {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: var(--blanco);
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.social-icon:hover {
+    background-color: var(--verde-muy-claro);
+    color: var(--verde-oscuro);
+    transform: translateY(-5px);
+    border-color: var(--verde-muy-claro);
+}
+
+/* Formulario de contacto */
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.contact-form input,
+.contact-form textarea {
+    padding: 0.7rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--blanco);
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    outline: none;
+    border-color: var(--verde-muy-claro);
+    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 8px rgba(232, 245, 240, 0.2);
+}
+
+.contact-form textarea {
+    resize: vertical;
+    min-height: 70px;
+}
+
+.contact-form button {
+    padding: 0.7rem 1.2rem;
+    background: linear-gradient(135deg, var(--verde-pastel-1) 0%, var(--verde-pastel-3) 100%);
+    color: var(--blanco);
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+}
+
+.contact-form button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.contact-form button:active {
+    transform: translateY(0px);
+}
+
+/* Footer bottom */
+.footer-bottom {
+    border-top: 2px solid rgba(255, 255, 255, 0.2);
+    padding-top: 1.5rem;
+    text-align: center;
+}
+
+.footer-bottom p {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* RESPONSIVE - Tablet */
+@media (max-width: 1024px) {
+    nav {
+        flex-direction: row;
+    }
+
+    .footer-content {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .location-map {
+        height: 250px;
+    }
+
+    .carousel-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+}
+
+/* RESPONSIVE - Móvil */
 @media (max-width: 768px) {
+    header {
+        padding: 1rem;
+    }
+
     nav {
         flex-direction: column;
         gap: 1rem;
@@ -565,13 +921,51 @@ footer p {
     }
 
     footer {
-        position: relative;
+        padding: 1.5rem 1rem 1rem;
+    }
+
+    .location-map {
+        height: 220px;
+        margin-bottom: 1.5rem;
+    }
+
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+    }
+
+    .footer-section h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .contact-item span {
+        font-size: 0.8rem;
+    }
+
+    .social-links {
+        justify-content: flex-start;
+    }
+
+    .contact-form {
+        gap: 0.6rem;
+    }
+
+    .product-card {
+        min-width: 200px;
+    }
+
+    .carousel-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
     }
 }
 
+/* RESPONSIVE - Móvil pequeño */
 @media (max-width: 480px) {
     header {
-        padding: 1rem;
+        padding: 0.8rem;
     }
 
     .logo {
@@ -591,6 +985,10 @@ footer p {
         font-size: 1.5rem;
     }
 
+    .landing .hero p {
+        font-size: 1rem;
+    }
+
     .form-container {
         padding: 1.5rem;
     }
@@ -598,21 +996,88 @@ footer p {
     section {
         padding: 1rem;
     }
-}
-.logo a {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    color: var(--blanco);
-}
 
-.logo-img {
-    height: 40px;
-    margin-right: 10px;
-    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.15));
-    transition: transform 0.3s ease;
-}
+    footer {
+        padding: 1rem 0.8rem 0.8rem;
+    }
 
-.logo-img:hover {
-    transform: scale(1.05);
+    .location-map {
+        height: 180px;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+    }
+
+    .footer-content {
+        gap: 1rem;
+    }
+
+    .footer-section h3 {
+        font-size: 1rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .contact-item i {
+        font-size: 1rem;
+        min-width: 20px;
+    }
+
+    .contact-item strong {
+        font-size: 0.85rem;
+    }
+
+    .contact-item span {
+        font-size: 0.75rem;
+    }
+
+    .social-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 0.95rem;
+    }
+
+    .phone-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+        margin-top: 0.6rem;
+    }
+
+    .contact-form input,
+    .contact-form textarea {
+        padding: 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    .contact-form textarea {
+        min-height: 60px;
+    }
+
+    .contact-form button {
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    .footer-bottom p {
+        font-size: 0.8rem;
+    }
+
+    .product-card {
+        min-width: 150px;
+        padding: 1rem;
+    }
+
+    .product-card h4 {
+        font-size: 1rem;
+    }
+
+    .product-card .price {
+        font-size: 1.2rem;
+    }
+
+    .carousel-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+        left: 0.5rem;
+        right: 0.5rem;
+    }
 }

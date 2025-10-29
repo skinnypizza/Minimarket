@@ -11,7 +11,7 @@
 
             <section class="create-product">
                 <h4>Crear Producto</h4>
-                <form action="/products" method="POST">
+                <form action="/products" method="POST" enctype="multipart/form-data">
                     <div>
                         <label for="name">Nombre</label>
                         <input id="name" name="name" required />
@@ -28,6 +28,11 @@
                         <label for="stock">Stock</label>
                         <input id="stock" name="stock" type="number" value="0" />
                     </div>
+                    <div>
+                        <label for="image">Imagen (opcional)</label>
+                        <input id="image" name="image" type="file" accept="image/*" />
+                        <small>Formatos permitidos: JPG, PNG, GIF. Máximo 5MB</small>
+                    </div>
                     <button class="btn" type="submit">Crear</button>
                 </form>
             </section>
@@ -38,6 +43,7 @@
                     <table>
                         <thead>
                             <tr>
+                                <th>Imagen</th>
                                 <th>Nombre</th>
                                 <th>Precio</th>
                                 <th>Stock</th>
@@ -47,27 +53,47 @@
                         <tbody>
                         <% products.forEach(function(product) { %>
                             <tr>
+                                <td>
+                                    <% if (product.image) { %>
+                                        <img src="<%= product.image %>" alt="<%= product.name %>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                                    <% } else { %>
+                                        <div style="width: 50px; height: 50px; background: #f0f0f0; border-radius: 5px; display: flex; align-items: center; justify-content: center; color: #999;">
+                                            Sin imagen
+                                        </div>
+                                    <% } %>
+                                </td>
                                 <td><%= product.name %></td>
-                                <td><%= product.price %></td>
+                                <td>$<%= product.price.toFixed(2) %></td>
                                 <td><%= product.stock %></td>
                                 <td>
-                                    <form style="display:inline" action="/products/<%= product._id %>/delete" method="POST" onsubmit="return confirm('Delete this product?');">
+                                    <form style="display:inline" action="/products/<%= product._id %>/delete" method="POST" onsubmit="return confirm('¿Eliminar este producto?');">
                                         <button class="btn" type="submit">Borrar</button>
                                     </form>
                                     <details style="display:inline; margin-left:8px;">
                                         <summary class="btn">Editar</summary>
-                                        <form action="/products/<%= product._id %>/update" method="POST" style="margin-top:8px;">
+                                        <form action="/products/<%= product._id %>/update" method="POST" enctype="multipart/form-data" style="margin-top:8px;">
                                             <div>
+                                                <label>Nombre</label>
                                                 <input name="name" value="<%= product.name %>" required />
                                             </div>
                                             <div>
+                                                <label>Descripción</label>
                                                 <input name="description" value="<%= product.description %>" />
                                             </div>
                                             <div>
+                                                <label>Precio</label>
                                                 <input name="price" type="number" step="0.01" value="<%= product.price %>" />
                                             </div>
                                             <div>
+                                                <label>Stock</label>
                                                 <input name="stock" type="number" value="<%= product.stock %>" />
+                                            </div>
+                                            <div>
+                                                <label>Nueva Imagen (opcional)</label>
+                                                <input name="image" type="file" accept="image/*" />
+                                                <% if (product.image) { %>
+                                                    <small>Imagen actual: <a href="<%= product.image %>" target="_blank">Ver</a></small>
+                                                <% } %>
                                             </div>
                                             <button class="btn" type="submit">Guardar</button>
                                         </form>

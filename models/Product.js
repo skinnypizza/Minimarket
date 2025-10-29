@@ -20,6 +20,10 @@ const ProductSchema = new mongoose.Schema({
     required: true,
     default: 0
   },
+  image: {
+    type: String,
+    default: null
+  },
   createdAt: {
     type: Date,
     default: Date.now
