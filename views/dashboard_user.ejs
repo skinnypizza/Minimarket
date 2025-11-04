@@ -191,11 +191,34 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('prevBtn').addEventListener('click', prevSlide);
     
     // Botón de checkout
-    document.getElementById('checkoutBtn').addEventListener('click', function() {
-        if (cart.length > 0) {
-            alert('¡Gracias por tu compra! Total: $' + cart.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2));
-            cart = [];
-            updateCartDisplay();
+    document.getElementById('checkoutBtn').addEventListener('click', async function() {
+        if (cart.length === 0) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/cart/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ cart }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showNotification(result.message);
+                cart = [];
+                updateCartDisplay();
+                // Optionally, refresh the product list to show updated stock
+                location.reload(); 
+            } else {
+                showNotification(result.message);
+            }
+        } catch (err) {
+            console.error('Error en el checkout:', err);
+            showNotification('Error al procesar la compra.');
         }
     });
     
