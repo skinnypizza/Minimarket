@@ -35,13 +35,50 @@ const UserSchema = new mongoose.Schema({
   }
 });
 
-// Encrypt password before saving
+// Validación de política de contraseña
 UserSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    next();
+  // Solo validar si la contraseña está siendo modificada y no está hasheada
+  if (this.isModified('password')) {
+    const password = this.password;
+    
+    // Verificar si la contraseña ya está hasheada (bcrypt empieza con $2)
+    const isHashed = password.startsWith('$2');
+    
+    // Solo validar si la contraseña no está hasheada (es texto plano)
+    if (!isHashed) {
+      // Validar longitud mínima
+      if (password.length < 8) {
+        return next(new Error('La contraseña debe tener al menos 8 caracteres'));
+      }
+      
+      // Validar que tenga mayúsculas
+      if (!/[A-Z]/.test(password)) {
+        return next(new Error('La contraseña debe contener al menos una letra mayúscula'));
+      }
+      
+      // Validar que tenga minúsculas
+      if (!/[a-z]/.test(password)) {
+        return next(new Error('La contraseña debe contener al menos una letra minúscula'));
+      }
+      
+      // Validar que tenga números
+      if (!/[0-9]/.test(password)) {
+        return next(new Error('La contraseña debe contener al menos un número'));
+      }
+      
+      // Validar que tenga caracteres especiales
+      if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+        return next(new Error('La contraseña debe contener al menos un carácter especial (!@#$%^&*...)'));
+      }
+    }
+    
+    // Cifrar contraseña antes de guardar (solo si no está hasheada)
+    if (!isHashed) {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(password, salt);
+    }
   }
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  next();
 });
 
 // Match password method

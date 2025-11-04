@@ -6,7 +6,8 @@ const { generateToken } = require('../middleware/jwtAuth');
 
 // Registro - mostrar formulario
 router.get('/register', public, (req, res) => {
-  res.render('register', { user: req.session.user });
+  const message = req.query.m;
+  res.render('register', { user: req.session.user, message });
 });
 
 // Registro - crear usuario (siempre rol user)
@@ -15,10 +16,11 @@ router.post('/register', async (req, res) => {
   try {
     const existing = await User.findOne({ email });
     if (existing) {
+      const errorMsg = 'Este correo electrónico ya está registrado. Por favor, utiliza otro correo o inicia sesión.';
       if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-        return res.status(400).json({ success: false, message: 'Email already exists' });
+        return res.status(400).json({ success: false, message: errorMsg });
       }
-      return res.redirect('/auth/register');
+      return res.redirect('/auth/register?m=' + encodeURIComponent(errorMsg));
     }
     
     const newUser = await User.create({ name, email, password, role: 'user' });
@@ -59,10 +61,23 @@ router.post('/register', async (req, res) => {
     res.redirect('/dashboard');
   } catch (err) {
     console.error(err);
-    if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-      return res.status(500).json({ success: false, message: 'Server error' });
+    let errorMessage = 'Error al registrar usuario. Por favor, intenta nuevamente.';
+    
+    // Mensajes de error más específicos
+    if (err.message && err.message.includes('already exists')) {
+      errorMessage = 'Este correo electrónico ya está registrado. Por favor, utiliza otro correo o inicia sesión.';
+    } else if (err.message && err.message.includes('contraseña')) {
+      errorMessage = err.message;
+    } else if (err.name === 'ValidationError') {
+      errorMessage = 'Error de validación: ' + Object.values(err.errors).map(e => e.message).join(', ');
+    } else if (err.message) {
+      errorMessage = err.message;
     }
-    res.redirect('/auth/register');
+    
+    if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+      return res.status(500).json({ success: false, message: errorMessage });
+    }
+    res.redirect('/auth/register?m=' + encodeURIComponent(errorMessage));
   }
 });
 
@@ -161,10 +176,21 @@ router.post('/login', async (req, res) => {
     }
   } catch (err) {
     console.error(err);
-    if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-      return res.status(500).json({ success: false, message: 'Server error' });
+    let errorMessage = 'Error al iniciar sesión. Por favor, intenta nuevamente.';
+    
+    // Mensajes de error más específicos
+    if (err.message && err.message.includes('bloqueada')) {
+      errorMessage = err.message;
+    } else if (err.name === 'ValidationError') {
+      errorMessage = 'Error de validación: ' + Object.values(err.errors).map(e => e.message).join(', ');
+    } else if (err.message) {
+      errorMessage = err.message;
     }
-    res.redirect('/auth/login');
+    
+    if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+      return res.status(500).json({ success: false, message: errorMessage });
+    }
+    res.redirect('/auth/login?m=' + encodeURIComponent(errorMessage));
   }
 });
 

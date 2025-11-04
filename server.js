@@ -24,8 +24,21 @@ app.use(cookieParser());
 app.use(session({
   secret: process.env.JWT_SECRET,
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 30 * 60 * 1000, // 30 minutos de inactividad
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production'
+  },
+  rolling: true // Renueva la sesión en cada petición
 }));
+
+// Flash messages middleware
+app.use((req, res, next) => {
+  res.locals.messages = req.session.messages || [];
+  delete req.session.messages;
+  next();
+});
 
 // Set static folder
 app.use(express.static(path.join(__dirname, 'public')));

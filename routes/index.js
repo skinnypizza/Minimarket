@@ -8,22 +8,29 @@ router.get('/', (req, res) => {
 });
 
 router.get('/dashboard', protect, (req, res) => {
+  const { search } = req.query;
+  const query = {};
+
+  if (search) {
+    query.name = { $regex: search, $options: 'i' };
+  }
+
   // Pass the session user to the templates so `user` is defined in EJS
   if (req.session.user && req.session.user.role === 'admin') {
     // fetch products to show in admin dashboard
-    Product.find().sort({ createdAt: -1 }).then(products => {
-      res.render('dashboard_admin', { user: req.session.user, products });
+    Product.find(query).sort({ createdAt: -1 }).then(products => {
+      res.render('dashboard_admin', { user: req.session.user, products, search });
     }).catch(err => {
       console.error(err);
-      res.render('dashboard_admin', { user: req.session.user, products: [] });
+      res.render('dashboard_admin', { user: req.session.user, products: [], search });
     });
   } else {
     // fetch products to show in user dashboard
-    Product.find().sort({ createdAt: -1 }).then(products => {
-      res.render('dashboard_user', { user: req.session.user, products });
+    Product.find(query).sort({ createdAt: -1 }).then(products => {
+      res.render('dashboard_user', { user: req.session.user, products, search });
     }).catch(err => {
       console.error(err);
-      res.render('dashboard_user', { user: req.session.user, products: [] });
+      res.render('dashboard_user', { user: req.session.user, products: [], search });
     });
   }
 });
