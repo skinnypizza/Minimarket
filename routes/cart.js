@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/auth');
 const Product = require('../models/Product');
+const Batch = require('../models/Batch');
+const { sequelize } = require('../config/db');
 
 // Checkout a cart
 router.post('/checkout', protect, async (req, res) => {
@@ -11,28 +13,62 @@ router.post('/checkout', protect, async (req, res) => {
         return res.status(400).json({ success: false, message: 'El carrito está vacío.' });
     }
 
+    const t = await sequelize.transaction();
+
     try {
-        // Step 1: Validate stock for all products in the cart
+        const productCache = {};
+
+        // Step 1: Validate all items and cache product data
         for (const item of cart) {
-            const product = await Product.findById(item.id);
+            if (typeof item.quantity !== 'number' || !Number.isInteger(item.quantity) || item.quantity <= 0) {
+                await t.rollback();
+                return res.status(400).json({ success: false, message: `Cantidad inválida para el producto ${item.name || item.id}.` });
+            }
+
+            const product = await Product.findByPk(item.id, { include: 'batches', transaction: t });
             if (!product) {
-                return res.status(404).json({ success: false, message: `Producto no encontrado: ${item.name}` });
+                await t.rollback();
+                return res.status(404).json({ success: false, message: `Producto no encontrado: ${item.name || item.id}` });
             }
-            if (product.stock < item.quantity) {
-                return res.status(400).json({ success: false, message: `Stock insuficiente para ${item.name}. Disponible: ${product.stock}, Solicitado: ${item.quantity}` });
+            if (product.totalStock < item.quantity) {
+                await t.rollback();
+                return res.status(400).json({ success: false, message: `Stock insuficiente para ${product.name}. Disponible: ${product.totalStock}, Solicitado: ${item.quantity}` });
             }
+            productCache[item.id] = product;
         }
 
-        // Step 2: If stock is sufficient for all items, update the database
+        // Step 2: Update the database using cached product data
         for (const item of cart) {
-            await Product.findByIdAndUpdate(item.id, {
-                $inc: { stock: -item.quantity }
-            });
+            const product = productCache[item.id]; // Get product from cache
+            let quantityToDeduct = item.quantity;
+
+            const sortedBatches = product.batches.sort((a, b) => a.purchaseDate - b.purchaseDate);
+
+            for (const batch of sortedBatches) {
+                if (quantityToDeduct <= 0) {
+                    break;
+                }
+
+                if (batch.quantity >= quantityToDeduct) {
+                    batch.quantity -= quantityToDeduct;
+                    quantityToDeduct = 0;
+                    if (batch.quantity > 0) {
+                        await batch.save({ transaction: t });
+                    } else {
+                        await batch.destroy({ transaction: t });
+                    }
+                } else {
+                    quantityToDeduct -= batch.quantity;
+                    await batch.destroy({ transaction: t });
+                }
+            }
         }
 
+        await t.commit();
         res.json({ success: true, message: '¡Compra realizada con éxito!' });
 
     } catch (err) {
+        await t.rollback();
         console.error(err);
         res.status(500).json({ success: false, message: 'Error al procesar la compra.' });
     }

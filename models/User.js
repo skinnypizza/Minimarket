@@ -1,89 +1,68 @@
-const mongoose = require('mongoose');
+const { Model, DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
+const { sequelize } = require('../config/db');
 
-const UserSchema = new mongoose.Schema({
+class User extends Model {
+  async matchPassword(enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+  }
+}
+
+User.init({
   name: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   email: {
-    type: String,
-    required: true,
+    type: DataTypes.STRING,
+    allowNull: false,
     unique: true
   },
   password: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   role: {
-    type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
+    type: DataTypes.ENUM('user', 'admin'),
+    defaultValue: 'user'
   },
-  // Control de bloqueo por intentos fallidos
   loginAttempts: {
-    type: Number,
-    default: 0
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   lockUntil: {
-    type: Date,
-    default: null
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
+    type: DataTypes.DATE,
+    defaultValue: null
+  }
+}, {
+  sequelize,
+  modelName: 'User',
+  hooks: {
+    beforeSave: async (user) => {
+      if (user.changed('password')) {
+        const password = user.password;
+
+        if (password.length < 8) {
+          throw new Error('La contraseña debe tener al menos 8 caracteres');
+        }
+        if (!/[A-Z]/.test(password)) {
+          throw new Error('La contraseña debe contener al menos una letra mayúscula');
+        }
+        if (!/[a-z]/.test(password)) {
+          throw new Error('La contraseña debe contener al menos una letra minúscula');
+        }
+        if (!/[0-9]/.test(password)) {
+          throw new Error('La contraseña debe contener al menos un número');
+        }
+        if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+          throw new Error('La contraseña debe contener al menos un carácter especial (!@#$%^&*...)');
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(user.password, salt);
+      }
+    }
   }
 });
 
-// Validación de política de contraseña
-UserSchema.pre('save', async function(next) {
-  // Solo validar si la contraseña está siendo modificada y no está hasheada
-  if (this.isModified('password')) {
-    const password = this.password;
-    
-    // Verificar si la contraseña ya está hasheada (bcrypt empieza con $2)
-    const isHashed = password.startsWith('$2');
-    
-    // Solo validar si la contraseña no está hasheada (es texto plano)
-    if (!isHashed) {
-      // Validar longitud mínima
-      if (password.length < 8) {
-        return next(new Error('La contraseña debe tener al menos 8 caracteres'));
-      }
-      
-      // Validar que tenga mayúsculas
-      if (!/[A-Z]/.test(password)) {
-        return next(new Error('La contraseña debe contener al menos una letra mayúscula'));
-      }
-      
-      // Validar que tenga minúsculas
-      if (!/[a-z]/.test(password)) {
-        return next(new Error('La contraseña debe contener al menos una letra minúscula'));
-      }
-      
-      // Validar que tenga números
-      if (!/[0-9]/.test(password)) {
-        return next(new Error('La contraseña debe contener al menos un número'));
-      }
-      
-      // Validar que tenga caracteres especiales
-      if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-        return next(new Error('La contraseña debe contener al menos un carácter especial (!@#$%^&*...)'));
-      }
-    }
-    
-    // Cifrar contraseña antes de guardar (solo si no está hasheada)
-    if (!isHashed) {
-      const salt = await bcrypt.genSalt(10);
-      this.password = await bcrypt.hash(password, salt);
-    }
-  }
-  next();
-});
-
-// Match password method
-UserSchema.methods.matchPassword = async function(enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
-};
-
-module.exports = mongoose.model('User', UserSchema);
+module.exports = User;

@@ -1143,6 +1143,33 @@ footer {
     }
 }
 
+.kpi-dashboard h4 {
+  color: var(--verde-oscuro);
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.charts-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.chart-card {
+  background: var(--blanco);
+  padding: 1.5rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.chart-card h5 {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: var(--gris-oscuro);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
 .btn-cancel {
     background: var(--gris-medio);
 }

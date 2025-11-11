@@ -2,36 +2,40 @@ const express = require('express');
 const router = express.Router();
 const { protect, admin } = require('../middleware/auth');
 const Product = require('../models/Product');
+const { Op } = require('sequelize');
 
 router.get('/', (req, res) => {
   res.render('landing', { user: req.session.user });
 });
 
-router.get('/dashboard', protect, (req, res) => {
-  const { search } = req.query;
-  const query = {};
+router.get('/dashboard', protect, async (req, res) => {
+  try {
+    const { search } = req.query;
+    const where = {};
 
-  if (search) {
-    query.name = { $regex: search, $options: 'i' };
-  }
+    if (search) {
+      where.name = { [Op.iLike]: `%${search}%` };
+    }
 
-  // Pass the session user to the templates so `user` is defined in EJS
-  if (req.session.user && req.session.user.role === 'admin') {
-    // fetch products to show in admin dashboard
-    Product.find(query).sort({ createdAt: -1 }).then(products => {
+    const products = await Product.findAll({
+      where,
+      order: [['createdAt', 'DESC']],
+      include: 'batches'
+    });
+    console.log('Products fetched for dashboard:', products.map(p => ({ id: p.id, name: p.name })));
+
+    if (req.session.user && req.session.user.role === 'admin') {
       res.render('dashboard_admin', { user: req.session.user, products, search });
-    }).catch(err => {
-      console.error(err);
-      res.render('dashboard_admin', { user: req.session.user, products: [], search });
-    });
-  } else {
-    // fetch products to show in user dashboard
-    Product.find(query).sort({ createdAt: -1 }).then(products => {
+    } else {
       res.render('dashboard_user', { user: req.session.user, products, search });
-    }).catch(err => {
-      console.error(err);
+    }
+  } catch (err) {
+    console.error(err);
+    if (req.session.user && req.session.user.role === 'admin') {
+      res.render('dashboard_admin', { user: req.session.user, products: [], search });
+    } else {
       res.render('dashboard_user', { user: req.session.user, products: [], search });
-    });
+    }
   }
 });
 

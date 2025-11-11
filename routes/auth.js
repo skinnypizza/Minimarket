@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const { protect, admin, public } = require('../middleware/auth');
-const { generateToken } = require('../middleware/jwtAuth');
 
 // Registro - mostrar formulario
 router.get('/register', public, (req, res) => {
@@ -14,7 +13,7 @@ router.get('/register', public, (req, res) => {
 router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
   try {
-    const existing = await User.findOne({ email });
+    const existing = await User.findOne({ where: { email } });
     if (existing) {
       const errorMsg = 'Este correo electrónico ya está registrado. Por favor, utiliza otro correo o inicia sesión.';
       if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
@@ -27,7 +26,7 @@ router.post('/register', async (req, res) => {
     
     // Autologin con sesión
     req.session.user = {
-      id: newUser._id,
+      id: newUser.id,
       name: newUser.name,
       email: newUser.email,
       role: newUser.role
@@ -49,7 +48,7 @@ router.post('/register', async (req, res) => {
         success: true,
         token,
         user: {
-          id: newUser._id,
+          id: newUser.id,
           name: newUser.name,
           email: newUser.email,
           role: newUser.role
@@ -63,13 +62,8 @@ router.post('/register', async (req, res) => {
     console.error(err);
     let errorMessage = 'Error al registrar usuario. Por favor, intenta nuevamente.';
     
-    // Mensajes de error más específicos
-    if (err.message && err.message.includes('already exists')) {
-      errorMessage = 'Este correo electrónico ya está registrado. Por favor, utiliza otro correo o inicia sesión.';
-    } else if (err.message && err.message.includes('contraseña')) {
-      errorMessage = err.message;
-    } else if (err.name === 'ValidationError') {
-      errorMessage = 'Error de validación: ' + Object.values(err.errors).map(e => e.message).join(', ');
+    if (err.name === 'SequelizeValidationError') {
+      errorMessage = 'Error de validación: ' + err.errors.map(e => e.message).join(', ');
     } else if (err.message) {
       errorMessage = err.message;
     }
@@ -90,25 +84,28 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ where: { email } });
 
-    // Si el usuario existe, validar estado de bloqueo
     const MAX_ATTEMPTS = 3;
     const LOCK_TIME_MS = 20 * 60 * 1000; // 20 minutos
 
+    console.log('Login attempt for:', email);
+    console.log('Current loginAttempts:', user ? user.loginAttempts : 'User not found');
+    console.log('MAX_ATTEMPTS:', MAX_ATTEMPTS);
+
     if (user) {
-      // Si el bloqueo ya expiró, restablecer
       if (user.lockUntil && user.lockUntil.getTime() <= Date.now()) {
+        console.log('User was locked, but lock expired. Resetting attempts.');
         user.loginAttempts = 0;
         user.lockUntil = null;
         await user.save();
       }
 
-      // Si sigue bloqueado, impedir acceso
       if (user.lockUntil && user.lockUntil.getTime() > Date.now()) {
         const msLeft = user.lockUntil.getTime() - Date.now();
         const minutes = Math.ceil(msLeft / (60 * 1000));
         const lockMsg = `Cuenta bloqueada por ${minutes} min. Intenta más tarde.`;
+        console.log('User is still locked.');
         if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
           return res.status(423).json({ success: false, message: lockMsg });
         }
@@ -117,37 +114,34 @@ router.post('/login', async (req, res) => {
     }
 
     if (user && (await user.matchPassword(password))) {
-      // Crear sesión tradicional
+      console.log('Password matched. Successful login.');
       req.session.user = {
-        id: user._id,
+        id: user.id,
         name: user.name,
         email: user.email,
         role: user.role
       };
-      // Reiniciar intentos al éxito
       if (user.loginAttempts || user.lockUntil) {
+        console.log('Resetting login attempts on successful login.');
         user.loginAttempts = 0;
         user.lockUntil = null;
         await user.save();
       }
       
-      // Generar JWT token
-      const token = generateToken(user);
+      const token = generateToken(newUser);
       
-      // Establecer cookie con el token
       res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         maxAge: 24 * 60 * 60 * 1000 // 24 horas
       });
       
-      // Si es una petición AJAX/API, devolver JSON con el token
       if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
         return res.json({
           success: true,
           token,
           user: {
-            id: user._id,
+            id: user.id,
             name: user.name,
             email: user.email,
             role: user.role
@@ -155,14 +149,15 @@ router.post('/login', async (req, res) => {
         });
       }
       
-      // Si es una petición web normal, redirigir
       res.redirect('/dashboard');
     } else {
-      // Credenciales inválidas: aumentar intentos y bloquear si corresponde
+      console.log('Password did not match or user not found.');
       if (user) {
         user.loginAttempts = (user.loginAttempts || 0) + 1;
+        console.log('Incremented loginAttempts to:', user.loginAttempts);
         if (user.loginAttempts >= MAX_ATTEMPTS) {
           user.lockUntil = new Date(Date.now() + LOCK_TIME_MS);
+          console.log('User locked until:', user.lockUntil);
         }
         await user.save();
       }
@@ -174,15 +169,13 @@ router.post('/login', async (req, res) => {
       const msg = remaining ? `Credenciales inválidas. Intentos restantes: ${remaining}` : 'Cuenta bloqueada por 20 min. Intenta más tarde.';
       res.redirect('/auth/login?m=' + encodeURIComponent(msg));
     }
-  } catch (err) {
+  }
+  catch (err) {
     console.error(err);
     let errorMessage = 'Error al iniciar sesión. Por favor, intenta nuevamente.';
     
-    // Mensajes de error más específicos
-    if (err.message && err.message.includes('bloqueada')) {
-      errorMessage = err.message;
-    } else if (err.name === 'ValidationError') {
-      errorMessage = 'Error de validación: ' + Object.values(err.errors).map(e => e.message).join(', ');
+    if (err.name === 'SequelizeValidationError') {
+      errorMessage = 'Error de validación: ' + err.errors.map(e => e.message).join(', ');
     } else if (err.message) {
       errorMessage = err.message;
     }
@@ -195,18 +188,13 @@ router.post('/login', async (req, res) => {
 });
 
 router.get('/logout', (req, res) => {
-  // Limpiar sesión
   req.session.destroy();
-  
-  // Limpiar cookie del token
   res.clearCookie('token');
   
-  // Si es una petición AJAX/API, devolver JSON
   if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
     return res.json({ success: true, message: 'Logged out successfully' });
   }
   
-  // Si es una petición web normal, redirigir
   res.redirect('/');
 });
 
@@ -218,7 +206,7 @@ router.get('/admin/register', protect, admin, (req, res) => {
 router.post('/admin/register', protect, admin, async (req, res) => {
   const { name, email, password } = req.body;
   try {
-    const existing = await User.findOne({ email });
+    const existing = await User.findOne({ where: { email } });
     if (existing) {
       return res.redirect('/auth/admin/register');
     }

@@ -1,33 +1,41 @@
-const mongoose = require('mongoose');
+const { Model, DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
+const Batch = require('./Batch');
 
-const ProductSchema = new mongoose.Schema({
+class Product extends Model {
+  get totalStock() {
+    if (this.batches) {
+      return this.batches.reduce((total, batch) => total + batch.quantity, 0);
+    }
+    return 0;
+  }
+}
+
+Product.init({
   name: {
-    type: String,
-    required: true,
+    type: DataTypes.STRING,
+    allowNull: false,
     trim: true
   },
   description: {
-    type: String,
+    type: DataTypes.STRING,
     trim: true
   },
-  price: {
-    type: Number,
-    required: true,
-    default: 0
-  },
-  stock: {
-    type: Number,
-    required: true,
-    default: 0
+  price: { // This is the selling price
+    type: DataTypes.FLOAT,
+    allowNull: false,
+    defaultValue: 0
   },
   image: {
-    type: String,
-    default: null
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
+    type: DataTypes.STRING,
+    defaultValue: null
   }
+}, {
+  sequelize,
+  modelName: 'Product'
 });
 
-module.exports = mongoose.model('Product', ProductSchema);
+Product.hasMany(Batch, { as: 'batches', foreignKey: 'productId' });
+Batch.belongsTo(Product, { foreignKey: 'productId' });
+
+module.exports = Product;

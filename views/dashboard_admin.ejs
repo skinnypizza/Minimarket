@@ -89,12 +89,16 @@
                                 </td>
                                 <td><%= product.name %></td>
                                 <td>$<%= product.price.toFixed(2) %></td>
-                                <td><%= product.stock %></td>
+                                <td><%= product.totalStock %></td>
                                 <td>
-                                    <form style="display:inline" action="/products/<%= product._id %>/delete" method="POST" onsubmit="return confirm('¿Eliminar este producto?');">
+                                    <% if (product.id) { %>
+                                    <form class="delete-product-form" data-product-id="<%= product.id %>" style="display:inline" onsubmit="handleDelete(event)">
                                         <button class="btn" type="submit">Borrar</button>
                                     </form>
-                                    <a href="/products/<%= product._id %>/edit" class="btn">Editar</a>
+                                    <a href="/products/<%= product.id %>/edit" class="btn">Editar</a>
+                                    <% } else { %>
+                                        <span>ID no disponible</span>
+                                    <% } %>
                                 </td>
                             </tr>
                         <% }); %>
@@ -104,7 +108,140 @@
                     <p>No products yet.</p>
                 <% } %>
             </section>
+
+            <section class="kpi-dashboard">
+              <h4>Indicadores Clave de Desempeño (KPIs)</h4>
+              <div class="charts-container">
+                <div class="chart-card">
+                  <h5>Ventas de la Semana</h5>
+                  <canvas id="salesOverTimeChart"></canvas>
+                </div>
+                <div class="chart-card">
+                  <h5>Productos Más Vendidos (Unidades)</h5>
+                  <canvas id="topSellingProductsChart"></canvas>
+                </div>
+                <div class="chart-card">
+                  <h5>Productos con Bajo Stock (Unidades)</h5>
+                  <canvas id="lowStockProductsChart"></canvas>
+                </div>
+              </div>
+            </section>
         </div>
     </div>
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/kpis')
+      .then(response => response.json())
+      .then(kpis => {
+        // 1. Sales Over Time Chart (Line)
+        new Chart(document.getElementById('salesOverTimeChart'), {
+          type: 'line',
+          data: {
+            labels: kpis.salesOverTime.labels,
+            datasets: [{
+              label: 'Ventas ($)',
+              data: kpis.salesOverTime.data,
+              borderColor: 'rgba(75, 192, 192, 1)',
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              fill: true,
+              tension: 0.1
+            }]
+          }
+        });
+
+        // 2. Top Selling Products Chart (Bar)
+        new Chart(document.getElementById('topSellingProductsChart'), {
+          type: 'bar',
+          data: {
+            labels: kpis.topSellingProducts.labels,
+            datasets: [{
+              label: 'Unidades Vendidas',
+              data: kpis.topSellingProducts.data,
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.5)',
+                'rgba(54, 162, 235, 0.5)',
+                'rgba(255, 206, 86, 0.5)',
+                'rgba(75, 192, 192, 0.5)',
+                'rgba(153, 102, 255, 0.5)'
+              ]
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+
+        // 3. Low Stock Products Chart (Horizontal Bar)
+        new Chart(document.getElementById('lowStockProductsChart'), {
+          type: 'bar',
+          data: {
+            labels: kpis.lowStockProducts.labels,
+            datasets: [{
+              label: 'Unidades en Stock',
+              data: kpis.lowStockProducts.data,
+              backgroundColor: 'rgba(255, 159, 64, 0.5)'
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            scales: {
+              x: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+      })
+      .catch(error => console.error('Error fetching KPI data:', error));
+  });
+
+  async function handleDelete(event) {
+    event.preventDefault(); // Prevent default form submission
+
+    const form = event.target;
+    const productId = form.dataset.productId;
+
+    if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+      return; // User cancelled
+    }
+
+    try {
+      const response = await fetch(`/products/${productId}/delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // If you have CSRF protection, you might need to include a token here
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Remove the product row from the table
+        const row = form.closest('tr');
+        if (row) {
+          row.remove();
+        }
+        // Optionally display a success message
+        console.log(data.message);
+        // You might want to add a flash message equivalent here
+        // For now, let's just log it or update a message div
+        alert(data.message);
+      } else {
+        console.error('Error deleting product:', data.message);
+        alert('Error: ' + data.message);
+      }
+    } catch (error) {
+      console.error('Network or unexpected error:', error);
+      alert('Ocurrió un error inesperado al eliminar el producto.');
+    }
+  }
+</script>
 <%- include('partials/footer') %>

@@ -3,7 +3,7 @@
     <h2>Editar Producto</h2>
     <div class="dashboard-content">
         <section class="edit-product">
-            <form action="/products/<%= product._id %>/update" method="POST" enctype="multipart/form-data">
+            <form action="/products/<%= product.id %>/update" method="POST" enctype="multipart/form-data">
                 <div>
                     <label for="name">Nombre</label>
                     <input id="name" name="name" required value="<%= product.name %>" />

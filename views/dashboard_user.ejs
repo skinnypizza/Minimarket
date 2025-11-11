@@ -28,7 +28,7 @@
                             <p><%= product.description || 'Sin descripción' %></p>
                             <div class="price">$<%= product.price.toFixed(2) %></div>
                             <div class="stock">Stock: <%= product.stock %></div>
-                            <button class="btn add-to-cart" data-product-id="<%= product._id %>" data-product-name="<%= product.name %>" data-product-price="<%= product.price %>">
+                            <button class="btn add-to-cart" data-product-id="<%= product.id %>" data-product-name="<%= product.name %>" data-product-price="<%= product.price %>">
                                 Agregar al Carrito
                             </button>
                         </div>
