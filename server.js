@@ -69,6 +69,7 @@ app.use('/auth', require('./routes/auth'));
 app.use('/products', require('./routes/products'));
 app.use('/api', require('./routes/api'));
 app.use('/cart', require('./routes/cart'));
+app.use('/api/sales', require('./routes/sales'));
 
 // KPI data endpoint - Validated with interview data
 app.get('/api/kpis', (req, res) => {

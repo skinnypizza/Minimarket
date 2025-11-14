@@ -1,24 +1,33 @@
 const { Model, DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
 
 class Batch extends Model {}
 
-Batch.init({
-  quantity: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
-  purchasePrice: {
-    type: DataTypes.FLOAT,
-    allowNull: false
-  },
-  purchaseDate: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW
-  }
-}, {
-  sequelize,
-  modelName: 'Batch'
-});
-
-module.exports = Batch;
+module.exports = (sequelize) => {
+  Batch.init({
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    quantity: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    purchasePrice: {
+      type: DataTypes.FLOAT,
+      allowNull: false
+    },
+    purchaseDate: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
+    },
+    productId: {
+      type: DataTypes.INTEGER,
+      allowNull: true // Allow null for now, association will handle foreign key constraint
+    }
+  }, {
+    sequelize,
+    modelName: 'Batch'
+  });
+  return Batch;
+};

@@ -1,0 +1,15 @@
+<%- include('partials/pos_header') %>
+
+<main class="pos-container">
+    <div class="pos-left">
+        <%- include('partials/pos_product_search') %>
+    </div>
+    <div class="pos-right">
+        <%- include('partials/pos_cart') %>
+    </div>
+</main>
+
+<%- include('partials/pos_footer') %>
+
+<!-- Incluir el script específico para la lógica del cajero -->
+<script src="/js/cajero.js"></script>

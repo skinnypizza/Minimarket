@@ -1,12 +1,61 @@
 const express = require('express');
 const router = express.Router();
-const { verifyToken, verifyAdmin } = require('../middleware/jwtAuth');
-const Product = require('../models/Product');
-const Batch = require('../models/Batch');
-const { sequelize } = require('../config/db');
+const { protect, admin, cajero } = require('../middleware/auth');
+const { Product, Batch, sequelize, Op } = require('../config/db');
 
-// Endpoint de prueba para verificar JWT
-router.get('/profile', verifyToken, (req, res) => {
+// @desc    Buscar productos para la venta (cajero)
+// @route   GET /api/products/search?q=...
+// @access  Private/Cajero
+router.get('/products/search', protect, cajero, async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q) {
+      return res.json([]);
+    }
+
+    const isNumeric = !isNaN(q);
+
+    const products = await Product.findAll({
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT COALESCE(SUM(quantity), 0)
+              FROM "Batches"
+              WHERE "Batches"."productId" = "Product".id
+            )`),
+            'totalStock'
+          ]
+        ]
+      },
+      where: {
+        [Op.and]: [
+          {
+            [Op.or]: [
+              { name: { [Op.iLike]: `%${q}%` } },
+              isNumeric ? { id: parseInt(q, 10) } : null
+            ].filter(Boolean)
+          },
+          sequelize.literal(`(
+            SELECT COALESCE(SUM(quantity), 0)
+            FROM "Batches"
+            WHERE "Batches"."productId" = "Product".id
+          ) > 0`)
+        ]
+      },
+      limit: 10
+    });
+
+    res.json(products);
+
+  } catch (error) {
+    console.error('Error en búsqueda de producto:', error.stack);
+    res.status(500).json({ message: 'Error al buscar productos' });
+  }
+});
+
+// Endpoint de prueba para verificar la autenticación
+router.get('/profile', protect, (req, res) => {
   res.json({
     success: true,
     user: {
@@ -19,7 +68,7 @@ router.get('/profile', verifyToken, (req, res) => {
 });
 
 // Endpoint para obtener productos (requiere autenticación)
-router.get('/products', verifyToken, async (req, res) => {
+router.get('/products', protect, async (req, res) => {
   try {
     const products = await Product.findAll({
       order: [['createdAt', 'DESC']],
@@ -39,7 +88,7 @@ router.get('/products', verifyToken, async (req, res) => {
 });
 
 // Endpoint para crear productos (solo admin)
-router.post('/products', verifyToken, verifyAdmin, async (req, res) => {
+router.post('/products', protect, admin, async (req, res) => {
   const t = await sequelize.transaction();
   try {
     const { name, description, price, stock } = req.body;
@@ -75,10 +124,9 @@ router.post('/products', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 // Endpoint para agregar al carrito (simulado)
-router.post('/cart/add', verifyToken, (req, res) => {
+router.post('/cart/add', protect, (req, res) => {
   const { productId, quantity } = req.body;
   
-  // Aquí podrías implementar lógica de carrito real
   res.json({
     success: true,
     message: 'Producto agregado al carrito',

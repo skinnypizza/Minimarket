@@ -1,0 +1,121 @@
+<%- include('partials/header') %>
+
+<main class="dashboard inventario">
+    <h2>Dashboard de Inventario</h2>
+
+    <div class="dashboard-content">
+        <% if (locals.messages && messages.length > 0) { %>
+            <div class="flash-messages">
+                <% messages.forEach(function(message) { %>
+                    <div class="alert alert-<%= message.type %>"><%= message.text %></div>
+                <% }); %>
+            </div>
+        <% } %>
+
+        <div class="admin-info">
+            <h3>Bienvenido, <%= user.name %> (<%= user.role %>)</h3>
+            <p>Panel de Gestión de Inventario y KPIs</p>
+        </div>
+
+        <div class="admin-dashboard-layout">
+            <%- include('partials/inventario_menu') %>
+
+            <div class="admin-main-content">
+                <%- include('partials/create_product_section') %>
+                <%- include('partials/product_management_section') %>
+                <%- include('partials/kpi_dashboard') %>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Script para la navegación de pestañas y carga de KPIs
+// Es idéntico al de dashboard_admin.ejs
+document.addEventListener('DOMContentLoaded', function() {
+    const links = document.querySelectorAll('.sidebar-link');
+    const sections = document.querySelectorAll('.admin-section-content');
+
+    function showSection(targetId) {
+        sections.forEach(section => {
+            section.style.display = (section.id === targetId) ? 'block' : 'none';
+        });
+    }
+
+    links.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.dataset.target;
+            links.forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+            showSection(targetId);
+            history.pushState(null, null, `#${targetId}`);
+        });
+    });
+
+    const currentHash = window.location.hash.substring(1);
+    if (currentHash && document.getElementById(currentHash)) {
+        const targetLink = document.querySelector(`.sidebar-link[data-target="${currentHash}"]`);
+        if (targetLink) {
+            links.forEach(l => l.classList.remove('active'));
+            targetLink.classList.add('active');
+            showSection(currentHash);
+        }
+    } else if (links.length > 0) {
+        links[0].classList.add('active');
+        showSection(links[0].dataset.target);
+    }
+
+    // Cargar KPIs
+    fetch('/api/kpis')
+      .then(response => response.json())
+      .then(kpis => {
+        new Chart(document.getElementById('salesOverTimeChart'), {
+          type: 'line',
+          data: {
+            labels: kpis.salesOverTime.labels,
+            datasets: [{ label: 'Ventas ($)', data: kpis.salesOverTime.data, borderColor: 'rgba(75, 192, 192, 1)', backgroundColor: 'rgba(75, 192, 192, 0.2)', fill: true, tension: 0.1 }]
+          }
+        });
+        new Chart(document.getElementById('topSellingProductsChart'), {
+          type: 'bar',
+          data: {
+            labels: kpis.topSellingProducts.labels,
+            datasets: [{ label: 'Unidades Vendidas', data: kpis.topSellingProducts.data, backgroundColor: ['rgba(255, 99, 132, 0.5)', 'rgba(54, 162, 235, 0.5)', 'rgba(255, 206, 86, 0.5)', 'rgba(75, 192, 192, 0.5)', 'rgba(153, 102, 255, 0.5)'] }]
+          },
+          options: { scales: { y: { beginAtZero: true } } }
+        });
+        new Chart(document.getElementById('lowStockProductsChart'), {
+          type: 'bar',
+          data: {
+            labels: kpis.lowStockProducts.labels,
+            datasets: [{ label: 'Unidades en Stock', data: kpis.lowStockProducts.data, backgroundColor: 'rgba(255, 159, 64, 0.5)' }]
+          },
+          options: { indexAxis: 'y', scales: { x: { beginAtZero: true } } }
+        });
+      })
+      .catch(error => console.error('Error fetching KPI data:', error));
+});
+
+async function handleDelete(event) {
+    event.preventDefault();
+    const form = event.target;
+    const productId = form.dataset.productId;
+    if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) return;
+    try {
+        const response = await fetch(`/products/${productId}/delete`, { method: 'POST' });
+        const data = await response.json();
+        if (data.success) {
+            form.closest('tr').remove();
+            alert(data.message);
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        alert('Ocurrió un error inesperado.');
+    }
+}
+</script>
+
+<%- include('partials/footer') %>

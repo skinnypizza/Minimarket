@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punto de Venta - Minimarket</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/cajero.css">
+</head>
+<body class="pos-body" data-user='<%- JSON.stringify(user) %>'>
+    <header>
+        <nav class="pos-nav">
+            <div class="logo">
+                <a href="/dashboard/cajero">
+                    <img src="/img/logo.png" alt="Logo Minimarket" class="logo-img">
+                    <span>Minimarket POS</span>
+                </a>
+            </div>
+            <div class="user-controls">
+                <span class="user-name"><i class="fas fa-user"></i> <%= user.name %></span>
+                <a href="/auth/logout" class="btn btn-logout" title="Cerrar Sesión">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </nav>
+    </header>

@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const { verifyToken, verifyAdmin } = require('./jwtAuth');
+const { User } = require('../config/db');
 
 // Middleware para rutas que NO necesitan autenticación
 exports.public = (req, res, next) => {
@@ -74,8 +73,47 @@ exports.admin = (req, res, next) => {
     next();
   } else {
     if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-      return res.status(403).json({ message: 'Admin access required' });
+      return res.status(403).json({ message: 'Acceso de Administrador requerido' });
     }
-    return res.redirect('/dashboard');
+    return res.status(403).render('partials/error', { message: 'No tienes permiso para acceder a esta página.', user });
+  }
+};
+
+exports.cajero = (req, res, next) => {
+  const user = req.user || req.session.user;
+
+  if (user && user.role === 'cajero') {
+    next();
+  } else {
+    if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+      return res.status(403).json({ message: 'Acceso de Cajero requerido' });
+    }
+    return res.status(403).render('partials/error', { message: 'No tienes permiso para acceder a esta página.', user });
+  }
+};
+
+exports.inventario = (req, res, next) => {
+  const user = req.user || req.session.user;
+
+  if (user && user.role === 'inventario') {
+    next();
+  } else {
+    if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+      return res.status(403).json({ message: 'Acceso de Inventario requerido' });
+    }
+    return res.status(403).render('partials/error', { message: 'No tienes permiso para acceder a esta página.', user });
+  }
+};
+
+exports.adminOrInventario = (req, res, next) => {
+  const user = req.user || req.session.user;
+
+  if (user && (user.role === 'admin' || user.role === 'inventario')) {
+    next();
+  } else {
+    if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+      return res.status(403).json({ message: 'Acceso de Administrador o Inventario requerido' });
+    }
+    return res.status(403).render('partials/error', { message: 'No tienes permiso para acceder a esta página.', user });
   }
 };

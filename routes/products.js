@@ -1,10 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Product');
-const Batch = require('../models/Batch');
+const { Product, Batch, sequelize } = require('../config/db');
 const { protect, admin } = require('../middleware/auth');
 const upload = require('../middleware/upload');
-const { sequelize } = require('../config/db');
 
 // Create a new product (admin only)
 router.post('/', protect, admin, upload.single('image'), async (req, res) => {

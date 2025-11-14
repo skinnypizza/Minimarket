@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
+const { User } = require('../config/db');
 const { protect, admin, public } = require('../middleware/auth');
 
 // Registro - mostrar formulario
@@ -16,9 +16,6 @@ router.post('/register', async (req, res) => {
     const existing = await User.findOne({ where: { email } });
     if (existing) {
       const errorMsg = 'Este correo electrónico ya está registrado. Por favor, utiliza otro correo o inicia sesión.';
-      if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-        return res.status(400).json({ success: false, message: errorMsg });
-      }
       return res.redirect('/auth/register?m=' + encodeURIComponent(errorMsg));
     }
     
@@ -32,31 +29,6 @@ router.post('/register', async (req, res) => {
       role: newUser.role
     };
     
-    // Generar JWT token
-    const token = generateToken(newUser);
-    
-    // Establecer cookie con el token
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 24 * 60 * 60 * 1000 // 24 horas
-    });
-    
-    // Si es una petición AJAX/API, devolver JSON con el token
-    if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-      return res.json({
-        success: true,
-        token,
-        user: {
-          id: newUser.id,
-          name: newUser.name,
-          email: newUser.email,
-          role: newUser.role
-        }
-      });
-    }
-    
-    // Si es una petición web normal, redirigir
     res.redirect('/dashboard');
   } catch (err) {
     console.error(err);
@@ -68,9 +40,6 @@ router.post('/register', async (req, res) => {
       errorMessage = err.message;
     }
     
-    if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-      return res.status(500).json({ success: false, message: errorMessage });
-    }
     res.redirect('/auth/register?m=' + encodeURIComponent(errorMessage));
   }
 });
@@ -86,16 +55,11 @@ router.post('/login', async (req, res) => {
   try {
     const user = await User.findOne({ where: { email } });
 
-    const MAX_ATTEMPTS = 3;
-    const LOCK_TIME_MS = 20 * 60 * 1000; // 20 minutos
-
-    console.log('Login attempt for:', email);
-    console.log('Current loginAttempts:', user ? user.loginAttempts : 'User not found');
-    console.log('MAX_ATTEMPTS:', MAX_ATTEMPTS);
+    const MAX_ATTEMPTS = 5;
+    const LOCK_TIME_MS = 15 * 60 * 1000; // 15 minutos
 
     if (user) {
       if (user.lockUntil && user.lockUntil.getTime() <= Date.now()) {
-        console.log('User was locked, but lock expired. Resetting attempts.');
         user.loginAttempts = 0;
         user.lockUntil = null;
         await user.save();
@@ -105,84 +69,41 @@ router.post('/login', async (req, res) => {
         const msLeft = user.lockUntil.getTime() - Date.now();
         const minutes = Math.ceil(msLeft / (60 * 1000));
         const lockMsg = `Cuenta bloqueada por ${minutes} min. Intenta más tarde.`;
-        console.log('User is still locked.');
-        if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-          return res.status(423).json({ success: false, message: lockMsg });
-        }
         return res.redirect('/auth/login?m=' + encodeURIComponent(lockMsg));
       }
     }
 
     if (user && (await user.matchPassword(password))) {
-      console.log('Password matched. Successful login.');
       req.session.user = {
         id: user.id,
         name: user.name,
         email: user.email,
         role: user.role
       };
-      if (user.loginAttempts || user.lockUntil) {
-        console.log('Resetting login attempts on successful login.');
+      if (user.loginAttempts > 0 || user.lockUntil) {
         user.loginAttempts = 0;
         user.lockUntil = null;
         await user.save();
       }
       
-      const token = generateToken(newUser);
-      
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 24 * 60 * 60 * 1000 // 24 horas
-      });
-      
-      if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-        return res.json({
-          success: true,
-          token,
-          user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role
-          }
-        });
-      }
-      
       res.redirect('/dashboard');
     } else {
-      console.log('Password did not match or user not found.');
       if (user) {
         user.loginAttempts = (user.loginAttempts || 0) + 1;
-        console.log('Incremented loginAttempts to:', user.loginAttempts);
         if (user.loginAttempts >= MAX_ATTEMPTS) {
           user.lockUntil = new Date(Date.now() + LOCK_TIME_MS);
-          console.log('User locked until:', user.lockUntil);
         }
         await user.save();
       }
 
-      const remaining = user ? Math.max(0, MAX_ATTEMPTS - (user.loginAttempts || 0)) : 0;
-      if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-        return res.status(401).json({ success: false, message: remaining ? `Credenciales inválidas. Intentos restantes: ${remaining}` : 'Cuenta bloqueada temporalmente.' });
-      }
-      const msg = remaining ? `Credenciales inválidas. Intentos restantes: ${remaining}` : 'Cuenta bloqueada por 20 min. Intenta más tarde.';
+      const remaining = user ? Math.max(0, MAX_ATTEMPTS - (user.loginAttempts || 0)) : MAX_ATTEMPTS;
+      const msg = remaining > 0 ? `Credenciales inválidas. Intentos restantes: ${remaining}` : 'Cuenta bloqueada por 15 min. Intenta más tarde.';
       res.redirect('/auth/login?m=' + encodeURIComponent(msg));
     }
   }
   catch (err) {
     console.error(err);
-    let errorMessage = 'Error al iniciar sesión. Por favor, intenta nuevamente.';
-    
-    if (err.name === 'SequelizeValidationError') {
-      errorMessage = 'Error de validación: ' + err.errors.map(e => e.message).join(', ');
-    } else if (err.message) {
-      errorMessage = err.message;
-    }
-    
-    if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-      return res.status(500).json({ success: false, message: errorMessage });
-    }
+    const errorMessage = 'Error al iniciar sesión. Por favor, intenta nuevamente.';
     res.redirect('/auth/login?m=' + encodeURIComponent(errorMessage));
   }
 });
@@ -204,16 +125,25 @@ router.get('/admin/register', protect, admin, (req, res) => {
 });
 
 router.post('/admin/register', protect, admin, async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role } = req.body; // Añadir role
   try {
     const existing = await User.findOne({ where: { email } });
     if (existing) {
+      // Idealmente, aquí se debería mostrar un mensaje de error en la vista
       return res.redirect('/auth/admin/register');
     }
-    await User.create({ name, email, password, role: 'admin' });
-    res.redirect('/dashboard');
+    // Usar el rol del formulario, con 'user' como fallback
+    await User.create({ name, email, password, role: role || 'user' });
+    
+    // Añadir mensaje de éxito para mostrar en el dashboard
+    req.session.messages = req.session.messages || [];
+    req.session.messages.push({ type: 'success', text: '¡Usuario creado exitosamente!' });
+
+    res.redirect('/dashboard#admin-management-section');
   } catch (err) {
     console.error(err);
+    req.session.messages = req.session.messages || [];
+    req.session.messages.push({ type: 'danger', text: 'Error al crear el usuario.' });
     res.redirect('/auth/admin/register');
   }
 });
