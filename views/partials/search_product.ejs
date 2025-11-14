@@ -1,0 +1,9 @@
+<section class="search-product">
+    <h4>Buscar Producto</h4>
+    <form action="/dashboard" method="GET">
+        <div class="form-group">
+            <input type="text" id="search" name="search" placeholder="Buscar por nombre..." value="<%= typeof search !== 'undefined' ? search : '' %>">
+            <button type="submit" class="btn">Buscar</button>
+        </div>
+    </form>
+</section>

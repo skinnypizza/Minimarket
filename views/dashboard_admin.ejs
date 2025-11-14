@@ -1,138 +1,86 @@
 <%- include('partials/header') %>
+
 <main class="dashboard admin">
     <h2>Admin Dashboard</h2>
+
     <div class="dashboard-content">
         <% if (locals.messages && messages.length > 0) { %>
-          <div class="flash-messages">
-            <% messages.forEach(function(message) { %>
-              <div class="alert alert-<%= message.type %>"><%= message.text %></div>
-            <% }); %>
-          </div>
+            <div class="flash-messages">
+                <% messages.forEach(function(message) { %>
+                    <div class="alert alert-<%= message.type %>"><%= message.text %></div>
+                <% }); %>
+            </div>
         <% } %>
+
         <div class="admin-info">
             <h3>Bienvenido, <%= user.name %></h3>
             <p>Panel de Administracion</p>
         </div>
-        <div class="admin-actions">
-            <h3>Panel de Administración</h3>
-            
-            <section class="admin-management">
-                <h4>Gestión de Administradores</h4>
-                <p>Crear nuevos administradores del sistema</p>
-                <a href="/auth/admin/register" class="btn">Crear Administrador</a>
-            </section>
 
-            <h3>Manejo de Productos</h3>
+        <div class="admin-dashboard-layout">
+            <%- include('partials/admin_menu') %>
 
-            <section class="create-product">
-                <h4>Crear Producto</h4>
-                <form action="/products" method="POST" enctype="multipart/form-data">
-                    <div>
-                        <label for="name">Nombre</label>
-                        <input id="name" name="name" required />
-                    </div>
-                    <div>
-                        <label for="description">Descripción</label>
-                        <input id="description" name="description" />
-                    </div>
-                    <div>
-                        <label for="price">Precio</label>
-                        <input id="price" name="price" type="number" step="0.01" value="0" />
-                    </div>
-                    <div>
-                        <label for="stock">Stock</label>
-                        <input id="stock" name="stock" type="number" value="0" />
-                    </div>
-                    <div>
-                        <label for="image">Imagen (opcional)</label>
-                        <input id="image" name="image" type="file" accept="image/*" />
-                        <small>Formatos permitidos: JPG, PNG, GIF. Máximo 5MB</small>
-                    </div>
-                    <button class="btn" type="submit">Crear</button>
-                </form>
-            </section>
-
-            <section class="search-product">
-                <h4>Buscar Producto</h4>
-                <form action="/dashboard" method="GET">
-                    <div class="form-group">
-                        <input type="text" id="search" name="search" placeholder="Buscar por nombre..." value="<%= typeof search !== 'undefined' ? search : '' %>">
-                        <button type="submit" class="btn">Buscar</button>
-                    </div>
-                </form>
-            </section>
-
-            <section class="product-list">
-                <h4>Productos</h4>
-                <% if (products && products.length) { %>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Imagen</th>
-                                <th>Nombre</th>
-                                <th>Precio</th>
-                                <th>Stock</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <% products.forEach(function(product) { %>
-                            <tr>
-                                <td>
-                                    <% if (product.image) { %>
-                                        <img src="<%= product.image %>" alt="<%= product.name %>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
-                                    <% } else { %>
-                                        <div style="width: 50px; height: 50px; background: #f0f0f0; border-radius: 5px; display: flex; align-items: center; justify-content: center; color: #999;">
-                                            Sin imagen
-                                        </div>
-                                    <% } %>
-                                </td>
-                                <td><%= product.name %></td>
-                                <td>$<%= product.price.toFixed(2) %></td>
-                                <td><%= product.totalStock %></td>
-                                <td>
-                                    <% if (product.id) { %>
-                                    <form class="delete-product-form" data-product-id="<%= product.id %>" style="display:inline" onsubmit="handleDelete(event)">
-                                        <button class="btn" type="submit">Borrar</button>
-                                    </form>
-                                    <a href="/products/<%= product.id %>/edit" class="btn">Editar</a>
-                                    <% } else { %>
-                                        <span>ID no disponible</span>
-                                    <% } %>
-                                </td>
-                            </tr>
-                        <% }); %>
-                        </tbody>
-                    </table>
-                <% } else { %>
-                    <p>No products yet.</p>
-                <% } %>
-            </section>
-
-            <section class="kpi-dashboard">
-              <h4>Indicadores Clave de Desempeño (KPIs)</h4>
-              <div class="charts-container">
-                <div class="chart-card">
-                  <h5>Ventas de la Semana</h5>
-                  <canvas id="salesOverTimeChart"></canvas>
-                </div>
-                <div class="chart-card">
-                  <h5>Productos Más Vendidos (Unidades)</h5>
-                  <canvas id="topSellingProductsChart"></canvas>
-                </div>
-                <div class="chart-card">
-                  <h5>Productos con Bajo Stock (Unidades)</h5>
-                  <canvas id="lowStockProductsChart"></canvas>
-                </div>
-              </div>
-            </section>
+            <div class="admin-main-content">
+                <%- include('partials/admin_management') %>
+                <%- include('partials/create_product_section') %>
+                <%- include('partials/product_management_section') %>
+                <%- include('partials/kpi_dashboard') %>
+            </div>
         </div>
     </div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
+    const links = document.querySelectorAll('.sidebar-link');
+    const sections = document.querySelectorAll('.admin-section-content');
+
+    // Function to switch sections
+    function showSection(targetId) {
+        sections.forEach(section => {
+            if (section.id === targetId) {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        });
+    }
+
+    // Handle sidebar link clicks
+    links.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.dataset.target;
+
+            // Update active link
+            links.forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+
+            // Show target section
+            showSection(targetId);
+
+            // Update URL hash without jumping
+            history.pushState(null, null, `#${targetId}`);
+        });
+    });
+
+    // Show section based on URL hash on page load
+    const currentHash = window.location.hash.substring(1);
+    if (currentHash) {
+        const targetLink = document.querySelector(`.sidebar-link[data-target="${currentHash}"]`);
+        if (targetLink) {
+            links.forEach(l => l.classList.remove('active'));
+            targetLink.classList.add('active');
+            showSection(currentHash);
+        }
+    } else {
+        // Show the first section by default if no hash
+        showSection(sections[0].id);
+        links[0].classList.add('active');
+    }
+
+
     fetch('/api/kpis')
       .then(response => response.json())
       .then(kpis => {
@@ -217,31 +165,24 @@
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // If you have CSRF protection, you might need to include a token here
         },
       });
 
       const data = await response.json();
 
       if (data.success) {
-        // Remove the product row from the table
         const row = form.closest('tr');
         if (row) {
           row.remove();
         }
-        // Optionally display a success message
-        console.log(data.message);
-        // You might want to add a flash message equivalent here
-        // For now, let's just log it or update a message div
         alert(data.message);
       } else {
-        console.error('Error deleting product:', data.message);
         alert('Error: ' + data.message);
       }
     } catch (error) {
-      console.error('Network or unexpected error:', error);
       alert('Ocurrió un error inesperado al eliminar el producto.');
     }
   }
 </script>
+
 <%- include('partials/footer') %>

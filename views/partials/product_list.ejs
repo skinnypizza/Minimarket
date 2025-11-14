@@ -1,0 +1,46 @@
+<section class="product-list">
+    <h4>Productos</h4>
+    <% if (products && products.length) { %>
+        <table>
+            <thead>
+                <tr>
+                    <th>Imagen</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            <% products.forEach(function(product) { %>
+                <tr>
+                    <td>
+                        <% if (product.image) { %>
+                            <img src="<%= product.image %>" alt="<%= product.name %>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                        <% } else { %>
+                            <div style="width: 50px; height: 50px; background: #f0f0f0; border-radius: 5px; display: flex; align-items: center; justify-content: center; color: #999;">
+                                Sin imagen
+                            </div>
+                        <% } %>
+                    </td>
+                    <td><%= product.name %></td>
+                    <td>$<%= product.price.toFixed(2) %></td>
+                    <td><%= product.totalStock %></td>
+                    <td>
+                        <% if (product.id) { %>
+                        <form class="delete-product-form" data-product-id="<%= product.id %>" style="display:inline" onsubmit="handleDelete(event)">
+                            <button class="btn" type="submit">Borrar</button>
+                        </form>
+                        <a href="/products/<%= product.id %>/edit" class="btn">Editar</a>
+                        <% } else { %>
+                            <span>ID no disponible</span>
+                        <% } %>
+                    </td>
+                </tr>
+            <% }); %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>No products yet.</p>
+    <% } %>
+</section>
