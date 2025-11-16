@@ -33,6 +33,10 @@ module.exports = (sequelize) => {
     image: {
       type: DataTypes.STRING,
       defaultValue: null
+    },
+    category: {
+      type: DataTypes.STRING(100),
+      defaultValue: 'General'
     }
   }, {
     sequelize,

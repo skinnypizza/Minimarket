@@ -25,6 +25,8 @@ const ProductModelDefinition = require('../models/Product');
 const BatchModelDefinition = require('../models/Batch');
 const SaleModelDefinition = require('../models/Sale');
 const SaleProductModelDefinition = require('../models/SaleProduct');
+const CartModelDefinition = require('../models/Cart');
+const CartItemModelDefinition = require('../models/CartItem');
 
 // --- 3. INICIALIZAR MODELOS CON LA INSTANCIA DE SEQUELIZE ---
 const User = UserModelDefinition(sequelize);
@@ -32,6 +34,8 @@ const Product = ProductModelDefinition(sequelize);
 const Batch = BatchModelDefinition(sequelize);
 const Sale = SaleModelDefinition(sequelize);
 const SaleProduct = SaleProductModelDefinition(sequelize);
+const Cart = CartModelDefinition(sequelize);
+const CartItem = CartItemModelDefinition(sequelize);
 
 // --- 4. DEFINIR ASOCIACIONES ---
 // User - Sale (One-to-Many)
@@ -58,6 +62,18 @@ Sale.belongsToMany(Product, {
 SaleProduct.belongsTo(Sale, { foreignKey: 'saleId' });
 SaleProduct.belongsTo(Product, { foreignKey: 'productId' });
 
+// User - Cart (One-to-Many)
+User.hasMany(Cart, { foreignKey: 'userId', as: 'carts' });
+Cart.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+// Cart - CartItem (One-to-Many)
+Cart.hasMany(CartItem, { foreignKey: 'cartId', as: 'items' });
+CartItem.belongsTo(Cart, { foreignKey: 'cartId', as: 'cart' });
+
+// Product - CartItem (One-to-Many)
+Product.hasMany(CartItem, { foreignKey: 'productId' });
+CartItem.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
+
 
 // --- 5. EXPORTAR TODO ---
 module.exports = {
@@ -68,5 +84,7 @@ module.exports = {
   Batch,
   Sale,
   SaleProduct,
+  Cart,
+  CartItem,
   Op: Sequelize.Op // Export Sequelize Operators
 };

@@ -1,0 +1,75 @@
+<!-- User Cart Sidebar Component -->
+<div class="bg-white rounded-lg sm:rounded-xl shadow-md overflow-hidden lg:sticky" style="top: 100px; border-top: 4px solid #52b788;">
+    <!-- Cart Header -->
+    <div class="text-white p-3 sm:p-4" style="background: linear-gradient(135deg, #52b788 0%, #a0dcc7 100%);">
+        <div class="flex items-center justify-between">
+            <h3 class="font-bold text-base sm:text-xl flex items-center gap-2">
+                <i class="fas fa-shopping-cart text-sm sm:text-base"></i>
+                Mi Carrito
+            </h3>
+            <span class="bg-white font-bold px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm" style="color: #52b788;" id="cartCount">0</span>
+        </div>
+    </div>
+
+    <!-- Cart Items -->
+    <div id="cartItemsContainer" class="overflow-y-auto" style="max-height: 400px;">
+        <!-- Empty state -->
+        <div id="emptyCartMessage" class="p-4 sm:p-6 text-center">
+            <i class="fas fa-shopping-basket text-4xl sm:text-5xl mb-2 sm:mb-3" style="color: #d4d8d4;"></i>
+            <p class="text-sm sm:text-base" style="color: #636e72;">Tu carrito está vacío</p>
+            <p class="text-xs sm:text-sm mt-1 sm:mt-2" style="color: #b2bec3;">¡Agrega productos!</p>
+        </div>
+        
+        <!-- Cart items will be inserted here -->
+        <div id="cartItems"></div>
+    </div>
+
+    <!-- Cart Summary -->
+    <div id="cartSummary" style="display: none; border-top: 1px solid #e8f5f0; background-color: #fafbf8;" class="p-3 sm:p-4">
+        <div class="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
+            <div class="flex justify-between text-sm sm:text-base" style="color: #636e72;">
+                <span>Subtotal:</span>
+                <span class="font-semibold">Bs. <span id="subtotalAmount">0.00</span></span>
+            </div>
+            <div class="flex justify-between text-lg sm:text-xl font-bold pt-2" style="border-top: 1px solid #d4d8d4; color: #2d3436;">
+                <span>Total:</span>
+                <span style="color: #52b788;">Bs. <span id="totalAmount">0.00</span></span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-2">
+            <button onclick="saveReservation()" 
+                    id="saveReservationBtn"
+                    class="w-full text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 active:scale-95 text-sm sm:text-base"
+                    style="background-color: #52b788;"
+                    ontouchstart="this.style.backgroundColor='#40916c'"
+                    ontouchend="this.style.backgroundColor='#52b788'"
+                    onmouseover="this.style.backgroundColor='#40916c'"
+                    onmouseout="this.style.backgroundColor='#52b788'">
+                <i class="fas fa-bookmark text-xs sm:text-sm"></i>
+                Guardar Reserva
+            </button>
+            <button onclick="clearCart()" 
+                    class="w-full text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 active:scale-95 text-sm sm:text-base"
+                    style="background-color: #d63031;"
+                    ontouchstart="this.style.backgroundColor='#c0392b'"
+                    ontouchend="this.style.backgroundColor='#d63031'"
+                    onmouseover="this.style.backgroundColor='#c0392b'"
+                    onmouseout="this.style.backgroundColor='#d63031'">
+                <i class="fas fa-trash text-xs sm:text-sm"></i>
+                Limpiar
+            </button>
+        </div>
+    </div>
+
+    <!-- Reservation Info -->
+    <div class="p-3 sm:p-4 text-xs sm:text-sm" style="background-color: #e8f5f0; border-top: 1px solid #b8e6d5;">
+        <div class="flex items-start gap-2" style="color: #2d3436;">
+            <i class="fas fa-info-circle mt-0.5 sm:mt-1" style="color: #52b788;"></i>
+            <p>
+                <strong>Importante:</strong> Reserva. Recoge y paga en tienda (7 días).
+            </p>
+        </div>
+    </div>
+</div>

@@ -74,7 +74,10 @@ router.get('/dashboard/cajero', protect, cajero, (req, res) => {
 // --- USER DASHBOARD ---
 router.get('/dashboard/user', protect, async (req, res) => {
   try {
-    const products = await Product.findAll({ order: [['name', 'ASC']] });
+    const products = await Product.findAll({ 
+      include: 'batches', 
+      order: [['name', 'ASC']] 
+    });
     res.render('dashboard_user', { 
       user: req.session.user,
       products,

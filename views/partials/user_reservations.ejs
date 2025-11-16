@@ -1,0 +1,180 @@
+<!-- User Reservations History Component -->
+<div class="bg-white rounded-lg sm:rounded-xl shadow-md p-3 sm:p-6" style="border-top: 4px solid #52b788;">
+    <div class="flex items-center justify-between mb-3 sm:mb-4">
+        <h3 class="font-bold text-lg sm:text-2xl flex items-center gap-2" style="color: #2d3436;">
+            <i class="fas fa-history text-sm sm:text-base"></i>
+            Mis Reservas
+        </h3>
+        <button onclick="loadReservations()" 
+                class="flex items-center gap-1.5 sm:gap-2 transition-colors text-sm sm:text-base active:scale-95 px-2 py-1 rounded" 
+                style="color: #52b788;"
+                ontouchstart="this.style.color='#40916c'; this.style.backgroundColor='#e8f5f0'"
+                ontouchend="this.style.color='#52b788'; this.style.backgroundColor='transparent'"
+                onmouseover="this.style.color='#40916c'"
+                onmouseout="this.style.color='#52b788'">
+            <i class="fas fa-sync-alt text-xs sm:text-sm"></i>
+            <span class="hidden sm:inline">Actualizar</span>
+        </button>
+    </div>
+
+    <!-- Reservations List -->
+    <div id="reservationsList" class="space-y-3 sm:space-y-4">
+        <div class="text-center py-6 sm:py-8" style="color: #636e72;">
+            <i class="fas fa-spinner fa-spin text-2xl sm:text-3xl mb-2 sm:mb-3"></i>
+            <p class="text-sm sm:text-base">Cargando reservas...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load user reservations
+async function loadReservations() {
+    const container = document.getElementById('reservationsList');
+    
+    try {
+        const response = await fetch('/cart/history');
+        const data = await response.json();
+
+        if (data.success && data.carts && data.carts.length > 0) {
+            container.innerHTML = data.carts.map(cart => {
+                const statusClass = {
+                    'pending': 'bg-yellow-100 text-yellow-800',
+                    'completed': 'bg-green-100 text-green-800',
+                    'cancelled': 'bg-red-100 text-red-800',
+                    'expired': 'bg-gray-100 text-gray-800'
+                };
+
+                const statusText = {
+                    'pending': 'Pendiente',
+                    'completed': 'Completada',
+                    'cancelled': 'Cancelada',
+                    'expired': 'Expirada'
+                };
+
+                const statusIcon = {
+                    'pending': 'fa-clock',
+                    'completed': 'fa-check-circle',
+                    'cancelled': 'fa-times-circle',
+                    'expired': 'fa-hourglass-end'
+                };
+
+                const createdDate = new Date(cart.createdAt).toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                const expiresDate = cart.expiresAt ? new Date(cart.expiresAt).toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                }) : 'N/A';
+
+                return `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <div class="font-bold text-lg text-gray-800 mb-1">
+                                    Reserva #${cart.reservationNumber}
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <i class="far fa-calendar"></i>
+                                    ${createdDate}
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-sm font-semibold ${statusClass[cart.status]}">
+                                <i class="fas ${statusIcon[cart.status]}"></i>
+                                ${statusText[cart.status]}
+                            </span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="text-sm text-gray-700 font-semibold mb-2">
+                                ${cart.items ? cart.items.length : 0} producto(s)
+                            </div>
+                            <div class="space-y-1">
+                                ${cart.items && cart.items.length > 0 ? cart.items.slice(0, 3).map(item => `
+                                    <div class="text-sm text-gray-600 flex justify-between">
+                                        <span>${item.quantity}x ${item.product ? item.product.name : 'Producto'}</span>
+                                        <span class="font-semibold">Bs. ${item.totalPrice.toFixed(2)}</span>
+                                    </div>
+                                `).join('') : '<span class="text-gray-400">Sin items</span>'}
+                                ${cart.items && cart.items.length > 3 ? `<div class="text-sm text-gray-500 italic">...y ${cart.items.length - 3} más</div>` : ''}
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-3 border-t border-gray-200">
+                            <div class="text-lg font-bold text-green-600">
+                                Total: Bs. ${cart.totalAmount.toFixed(2)}
+                            </div>
+                            ${cart.status === 'pending' ? `
+                                <button onclick="cancelReservation(${cart.id})" 
+                                        class="text-red-600 hover:text-red-700 text-sm font-semibold">
+                                    <i class="fas fa-times"></i>
+                                    Cancelar
+                                </button>
+                            ` : ''}
+                        </div>
+
+                        ${cart.status === 'pending' ? `
+                            <div class="mt-2 text-sm text-gray-600">
+                                <i class="far fa-clock"></i>
+                                Válida hasta: ${expiresDate}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        } else {
+            container.innerHTML = `
+                <div class="text-center py-8">
+                    <i class="fas fa-inbox text-5xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-500">No tienes reservas aún</p>
+                    <p class="text-gray-400 text-sm mt-2">Las reservas que hagas aparecerán aquí</p>
+                </div>
+            `;
+        }
+    } catch (err) {
+        console.error('Error loading reservations:', err);
+        container.innerHTML = `
+            <div class="text-center py-8 text-red-500">
+                <i class="fas fa-exclamation-circle text-4xl mb-3"></i>
+                <p>Error al cargar las reservas</p>
+            </div>
+        `;
+    }
+}
+
+// Cancel reservation
+async function cancelReservation(cartId) {
+    if (!confirm('¿Estás seguro de que quieres cancelar esta reserva?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/cart/cancel/${cartId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification('Reserva cancelada exitosamente', 'success');
+            loadReservations();
+        } else {
+            showNotification(data.message || 'Error al cancelar la reserva', 'error');
+        }
+    } catch (err) {
+        console.error('Error cancelling reservation:', err);
+        showNotification('Error al cancelar la reserva', 'error');
+    }
+}
+
+// Load reservations on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadReservations();
+});
+</script>

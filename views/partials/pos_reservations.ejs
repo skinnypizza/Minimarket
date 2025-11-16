@@ -1,0 +1,308 @@
+<!-- Reservations List for POS -->
+<div class="reservations-list-container">
+    <h3 class="reservations-title">
+        <i class="fas fa-bookmark"></i>
+        Reservas Pendientes
+        <button onclick="loadPOSReservations()" class="refresh-btn">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+    </h3>
+    
+    <div class="reservations-list" id="pos-reservations-list">
+        <div class="loading-reservations">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Cargando reservas...</p>
+        </div>
+    </div>
+</div>
+
+<style>
+.reservations-list-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-top: 4px solid var(--verde-oscuro);
+}
+
+.reservations-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--gris-oscuro);
+    margin-bottom: 1rem;
+    justify-content: space-between;
+}
+
+.refresh-btn {
+    background: var(--verde-oscuro);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.3s;
+}
+
+.refresh-btn:hover {
+    background: #40916c;
+}
+
+.reservations-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.reservation-item {
+    border: 1px solid var(--gris-medio);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    background: var(--blanco);
+    transition: all 0.3s;
+}
+
+.reservation-item:hover {
+    box-shadow: 0 4px 12px rgba(82, 183, 136, 0.2);
+    border-color: var(--verde-oscuro);
+}
+
+.reservation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.reservation-number {
+    font-weight: bold;
+    color: var(--verde-oscuro);
+    font-size: 1rem;
+}
+
+.reservation-customer {
+    color: var(--gris-oscuro);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+.reservation-date {
+    color: #636e72;
+    font-size: 0.85rem;
+}
+
+.reservation-items {
+    background: var(--gris-claro);
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+}
+
+.reservation-item-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--gris-oscuro);
+    padding: 0.25rem 0;
+}
+
+.reservation-total {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: var(--verde-oscuro);
+    margin-bottom: 0.75rem;
+}
+
+.import-btn {
+    width: 100%;
+    background: var(--verde-oscuro);
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.import-btn:hover {
+    background: #40916c;
+}
+
+.loading-reservations {
+    text-align: center;
+    padding: 2rem;
+    color: #636e72;
+}
+
+.loading-reservations i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.no-reservations {
+    text-align: center;
+    padding: 2rem;
+    color: #636e72;
+}
+
+.no-reservations i {
+    font-size: 3rem;
+    color: var(--gris-medio);
+    margin-bottom: 0.5rem;
+}
+</style>
+
+<script>
+// Load pending reservations for POS
+async function loadPOSReservations() {
+    const container = document.getElementById('pos-reservations-list');
+    
+    container.innerHTML = `
+        <div class="loading-reservations">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Cargando reservas...</p>
+        </div>
+    `;
+    
+    try {
+        const response = await fetch('/cart/all-pending');
+        const data = await response.json();
+        
+        if (data.success && data.carts && data.carts.length > 0) {
+            container.innerHTML = data.carts.map(cart => {
+                const createdDate = new Date(cart.createdAt).toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                return `
+                    <div class="reservation-item">
+                        <div class="reservation-header">
+                            <div>
+                                <div class="reservation-number">Reserva #${cart.reservationNumber}</div>
+                                <div class="reservation-customer">
+                                    <i class="fas fa-user"></i> ${cart.user ? cart.user.name : 'Cliente'}
+                                </div>
+                                <div class="reservation-date">
+                                    <i class="far fa-calendar"></i> ${createdDate}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="reservation-items">
+                            ${cart.items && cart.items.length > 0 ? cart.items.slice(0, 3).map(item => `
+                                <div class="reservation-item-row">
+                                    <span>${item.quantity}x ${item.product ? item.product.name : 'Producto'}</span>
+                                    <span>Bs. ${item.totalPrice.toFixed(2)}</span>
+                                </div>
+                            `).join('') : '<p>Sin items</p>'}
+                            ${cart.items && cart.items.length > 3 ? `<div class="reservation-item-row"><span style="font-style: italic;">...y ${cart.items.length - 3} más</span></div>` : ''}
+                        </div>
+                        
+                        <div class="reservation-total">
+                            Total: Bs. ${cart.totalAmount.toFixed(2)}
+                        </div>
+                        
+                        <button class="import-btn" onclick="importReservationToPOS(${cart.id}, ${JSON.stringify(cart.items).replace(/"/g, '&quot;')})">
+                            <i class="fas fa-download"></i>
+                            Importar al POS
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            container.innerHTML = `
+                <div class="no-reservations">
+                    <i class="fas fa-inbox"></i>
+                    <p>No hay reservas pendientes</p>
+                </div>
+            `;
+        }
+    } catch (err) {
+        console.error('Error loading reservations:', err);
+        container.innerHTML = `
+            <div class="no-reservations" style="color: #d63031;">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Error al cargar las reservas</p>
+            </div>
+        `;
+    }
+}
+
+// Import reservation to POS cart and mark as completed
+async function importReservationToPOS(cartId, items) {
+    if (!items || items.length === 0) {
+        alert('Esta reserva no tiene productos');
+        return;
+    }
+    
+    // Clear current POS cart
+    if (typeof cart !== 'undefined' && cart.length > 0) {
+        if (!confirm('Esto reemplazará el carrito actual. ¿Continuar?')) {
+            return;
+        }
+    }
+    
+    // Import items to POS
+    items.forEach(item => {
+        if (item.product && typeof addProductToCart === 'function') {
+            // Add to POS cart using the POS function
+            for (let i = 0; i < item.quantity; i++) {
+                addProductToCart(item.product.id, item.product.name, item.unitPrice);
+            }
+        }
+    });
+    
+    // Marcar reserva como completada
+    try {
+        const response = await fetch(`/cart/complete/${cartId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Reload reservations list to remove completed one
+            loadPOSReservations();
+        }
+    } catch (err) {
+        console.error('Error marking reservation as completed:', err);
+    }
+    
+    // Show success message
+    if (typeof showNotification === 'function') {
+        showNotification(`Reserva importada al POS`, 'success');
+    } else {
+        alert(`Reserva importada al POS con ${items.length} producto(s)`);
+    }
+    
+    // Scroll to cart
+    const cartSection = document.querySelector('.cart-container');
+    if (cartSection) {
+        cartSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// Auto-load on page load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadPOSReservations);
+} else {
+    loadPOSReservations();
+}
+
+// Auto-refresh every 30 seconds
+setInterval(loadPOSReservations, 30000);
+</script>

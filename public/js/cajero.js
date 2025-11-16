@@ -177,6 +177,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         renderCart();
     };
+    
+    // Make addProductToCart available globally for reservation import
+    window.addProductToCart = (productId, productName, productPrice) => {
+        // Find product in cart or create a simple version
+        const product = {
+            id: productId,
+            name: productName,
+            price: productPrice,
+            totalStock: 1000 // Default high stock for reservations
+        };
+        addToCart(product);
+    };
 
     const updateQuantity = (index, quantity) => {
         const product = cart[index];
