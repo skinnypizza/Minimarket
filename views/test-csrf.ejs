@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="csrf-token" content="<%= csrfToken %>">
+    <title>Test CSRF</title>
+    <script src="/js/csrf-helper.js"></script>
+</head>
+
+<body>
+    <h1>Test CSRF</h1>
+    <p>Token CSRF: <strong id="token-display"></strong></p>
+
+    <button onclick="testDelete()">Test Delete Product 65</button>
+    <div id="result"></div>
+
+    <script>
+        // Mostrar token
+        document.getElementById('token-display').textContent = getCsrfToken();
+
+        async function testDelete() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Enviando petición...';
+
+            const token = getCsrfToken();
+            console.log('Token CSRF:', token);
+
+            try {
+                const response = await fetch('/products/65/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'CSRF-Token': token
+                    }
+                });
+
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                resultDiv.innerHTML = `
+                    <h3>Resultado:</h3>
+                    <p>Status: ${response.status}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+
+</html>

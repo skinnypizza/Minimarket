@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>CSRF Test</title>
+</head>
+
+<body>
+    <h1>CSRF Token Test</h1>
+
+    <h2>Token Information:</h2>
+    <p><strong>CSRF Token:</strong>
+        <%= csrfToken %>
+    </p>
+    <p><strong>Token Length:</strong>
+        <%= csrfToken ? csrfToken.length : 0 %>
+    </p>
+
+    <h2>Test Form:</h2>
+    <form action="/products" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label>Product Name:</label>
+        <input type="text" name="name" value="Test Product" required>
+        <br><br>
+        <label>Price:</label>
+        <input type="number" name="price" value="10" step="0.01">
+        <br><br>
+        <label>Stock:</label>
+        <input type="number" name="stock" value="5">
+        <br><br>
+        <button type="submit">Submit Test</button>
+    </form>
+
+    <h2>JavaScript Test:</h2>
+    <button onclick="testCsrf()">Test CSRF via JavaScript</button>
+    <div id="result"></div>
+
+    <script src="/js/csrf-helper.js"></script>
+    <script>
+        console.log('CSRF Token from EJS:', '<%= csrfToken %>');
+        console.log('CSRF Token from getCsrfToken():', getCsrfToken());
+
+        async function testCsrf() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+
+            try {
+                const response = await fetch('/api/test-csrf', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'CSRF-Token': getCsrfToken()
+                    },
+                    body: JSON.stringify({ test: 'data' })
+                });
+
+                const data = await response.json();
+                resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (err) {
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+            }
+        }
+    </script>
+</body>
+
+</html>

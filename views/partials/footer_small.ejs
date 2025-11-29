@@ -1,0 +1,72 @@
+<style>
+    /* Minimalist Footer Styles */
+    .footer-small {
+        background: linear-gradient(135deg, var(--verde-oscuro) 0%, var(--verde-pastel-2) 100%);
+        color: var(--blanco);
+        padding: 2rem 1rem;
+        margin-top: 3rem;
+    }
+
+    .footer-small-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .footer-small .social-links {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .footer-small .social-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        color: var(--blanco);
+        text-decoration: none;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .footer-small .social-icon:hover {
+        background-color: var(--verde-muy-claro);
+        color: var(--verde-oscuro);
+        transform: translateY(-3px);
+        border-color: var(--verde-muy-claro);
+    }
+
+    .footer-small .footer-bottom p {
+        text-align: center;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.85);
+    }
+</style>
+
+<footer class="footer-small">
+    <div class="footer-small-container">
+        <!-- Social Links -->
+        <div class="social-links">
+            <a href="https://www.facebook.com/maxmarket" class="social-icon" title="Facebook" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/maxmarket" class="social-icon" title="Instagram" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.whatsapp.com/send?phone=591234567890" class="social-icon" title="WhatsApp" target="_blank"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.tiktok.com/@maxmarket" class="social-icon" title="TikTok" target="_blank"><i class="fab fa-tiktok"></i></a>
+        </div>
+
+        <!-- Footer Bottom -->
+        <div class="footer-bottom">
+            <p>&copy; 2025 MAXMARKET. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

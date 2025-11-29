@@ -1,9 +1,14 @@
-<section class="search-product">
-    <h4>Buscar Producto</h4>
-    <form action="/dashboard" method="GET">
-        <div class="form-group">
-            <input type="text" id="search" name="search" placeholder="Buscar por nombre..." value="<%= typeof search !== 'undefined' ? search : '' %>">
-            <button type="submit" class="btn">Buscar</button>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
+    <form action="/dashboard" method="GET" class="flex gap-3">
+        <div class="flex-1 relative">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input type="text" id="search" name="search" placeholder="Buscar por nombre..."
+                value="<%= typeof search !== 'undefined' ? search : '' %>"
+                class="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-brand-500 focus:ring-0 outline-none transition-colors">
         </div>
+        <button type="submit"
+            class="px-6 py-3 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition-colors shadow-sm">
+            <i class="fas fa-search mr-2"></i> Buscar
+        </button>
     </form>
-</section>
+</div>

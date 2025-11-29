@@ -1,19 +1,20 @@
-<section id="kpi-dashboard-section" class="admin-section-content" style="display: none;">
-    <div class="kpi-dashboard">
-        <h4>Indicadores Clave de Desempeño (KPIs)</h4>
-        <div class="charts-container">
-            <div class="chart-card">
-                <h5>Ventas de la Semana</h5>
-                <canvas id="salesOverTimeChart"></canvas>
-            </div>
-            <div class="chart-card">
-                <h5>Productos Más Vendidos (Unidades)</h5>
-                <canvas id="topSellingProductsChart"></canvas>
-            </div>
-            <div class="chart-card">
-                <h5>Productos con Bajo Stock (Unidades)</h5>
-                <canvas id="lowStockProductsChart"></canvas>
-            </div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h5 class="text-sm font-bold text-gray-500 mb-4 uppercase tracking-wide">Ventas de la Semana</h5>
+        <div class="h-64">
+            <canvas id="salesOverTimeChart"></canvas>
         </div>
     </div>
-</section>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h5 class="text-sm font-bold text-gray-500 mb-4 uppercase tracking-wide">Productos Más Vendidos</h5>
+        <div class="h-64">
+            <canvas id="topSellingProductsChart"></canvas>
+        </div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h5 class="text-sm font-bold text-gray-500 mb-4 uppercase tracking-wide">Bajo Stock</h5>
+        <div class="h-64">
+            <canvas id="lowStockProductsChart"></canvas>
+        </div>
+    </div>
+</div>

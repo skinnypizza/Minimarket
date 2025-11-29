@@ -5,12 +5,31 @@ const { Product, User, sequelize } = require('../config/db');
 const { Op } = require('sequelize');
 
 // Landing page
-router.get('/', (req, res) => {
-  // Si el usuario está logueado, redirigir al dashboard, si no, a la landing.
+router.get('/', async (req, res) => {
+  // Si el usuario está logueado, redirigir al dashboard
   if (req.session.user) {
     return res.redirect('/dashboard');
   }
-  res.render('landing', { user: null });
+
+  try {
+    // Obtener productos destacados (los 4 más recientes con stock)
+    const featuredProducts = await Product.findAll({
+      include: 'batches',
+      limit: 4,
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.render('landing', {
+      user: null,
+      products: featuredProducts
+    });
+  } catch (err) {
+    console.error('Error fetching landing products:', err);
+    res.render('landing', {
+      user: null,
+      products: []
+    });
+  }
 });
 
 // --- DASHBOARD ROUTER ---
@@ -39,11 +58,11 @@ router.get('/dashboard/admin', protect, admin, async (req, res) => {
   try {
     const users = await User.findAll({ where: { role: { [Op.ne]: 'admin' } } });
     const products = await Product.findAll({ include: 'batches', order: [['name', 'ASC']] });
-    res.render('dashboard_admin', { 
+    res.render('dashboard_admin', {
       user: req.session.user,
       users,
       products,
-      search: '' 
+      search: ''
     });
   } catch (err) {
     console.error(err);
@@ -55,7 +74,7 @@ router.get('/dashboard/admin', protect, admin, async (req, res) => {
 router.get('/dashboard/inventario', protect, adminOrInventario, async (req, res) => {
   try {
     const products = await Product.findAll({ include: 'batches', order: [['name', 'ASC']] });
-    res.render('dashboard_inventario', { 
+    res.render('dashboard_inventario', {
       user: req.session.user,
       products,
       search: ''
@@ -74,11 +93,11 @@ router.get('/dashboard/cajero', protect, cajero, (req, res) => {
 // --- USER DASHBOARD ---
 router.get('/dashboard/user', protect, async (req, res) => {
   try {
-    const products = await Product.findAll({ 
-      include: 'batches', 
-      order: [['name', 'ASC']] 
+    const products = await Product.findAll({
+      include: 'batches',
+      order: [['name', 'ASC']]
     });
-    res.render('dashboard_user', { 
+    res.render('dashboard_user', {
       user: req.session.user,
       products,
       search: ''

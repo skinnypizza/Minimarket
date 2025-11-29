@@ -1,36 +1,96 @@
 <%- include('partials/header') %>
-<main class="dashboard admin">
-    <h2>Editar Producto</h2>
-    <div class="dashboard-content">
-        <section class="edit-product">
-            <form action="/products/<%= product.id %>/update" method="POST" enctype="multipart/form-data">
-                <div>
-                    <label for="name">Nombre</label>
-                    <input id="name" name="name" required value="<%= product.name %>" />
+    <main class="dashboard admin">
+        <h2>Editar Producto</h2>
+        <div class="dashboard-content">
+            <section class="edit-product">
+                <form action="/products/<%= product.id %>/update" method="POST" enctype="multipart/form-data">
+                    <div>
+                        <label for="name">Nombre</label>
+                        <input id="name" name="name" required value="<%= product.name %>" />
+                    </div>
+                    <div>
+                        <label for="description">Descripción</label>
+                        <input id="description" name="description" value="<%= product.description %>" />
+                    </div>
+                    <div>
+                        <label for="price">Precio</label>
+                        <input id="price" name="price" type="number" step="0.01" value="<%= product.price %>" />
+                    </div>
+                    <div>
+                        <label for="stock">Stock</label>
+                        <input id="stock" name="stock" type="number" value="<%= product.stock %>" disabled />
+                        <small class="form-text text-muted">El stock se calcula automáticamente basado en los lotes
+                            (Batches).</small>
+                    </div>
+                    <div>
+                        <label for="image">Nueva Imagen (opcional)</label>
+                        <input id="image" name="image" type="file" accept="image/*" />
+                        <% if (product.image) { %>
+                            <small>Imagen actual: <a href="<%= product.image %>" target="_blank">Ver</a></small>
+                            <% } %>
+                    </div>
+                    <button class="btn" type="submit">Guardar Cambios</button>
+                    <a href="/dashboard" class="btn btn-cancel">Cancelar</a>
+                </form>
+            </section>
+
+            <section class="batch-management" style="margin-top: 2rem;">
+                <h3>Gestión de Lotes</h3>
+
+                <div class="current-batches">
+                    <h4>Lotes Actuales</h4>
+                    <% if (product.batches && product.batches.length> 0) { %>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio Compra</th>
+                                    <th>Fecha Compra</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% product.batches.forEach(batch=> { %>
+                                    <tr>
+                                        <td>
+                                            <%= batch.id %>
+                                        </td>
+                                        <td>
+                                            <%= batch.quantity %>
+                                        </td>
+                                        <td>
+                                            <%= batch.purchasePrice %>
+                                        </td>
+                                        <td>
+                                            <%= new Date(batch.purchaseDate).toLocaleDateString() %>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                            </tbody>
+                        </table>
+                        <% } else { %>
+                            <p>No hay lotes registrados.</p>
+                            <% } %>
                 </div>
-                <div>
-                    <label for="description">Descripción</label>
-                    <input id="description" name="description" value="<%= product.description %>" />
+
+                <div class="add-batch-form"
+                    style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
+                    <h4>Agregar Nuevo Lote</h4>
+                    <form action="/products/<%= product.id %>/batch" method="POST">
+                        <div style="display: flex; gap: 1rem;">
+                            <div>
+                                <label for="batchQuantity">Cantidad</label>
+                                <input type="number" id="batchQuantity" name="quantity" required min="1">
+                            </div>
+                            <div>
+                                <label for="batchPrice">Precio de Compra (Unitario)</label>
+                                <input type="number" id="batchPrice" name="purchasePrice" required step="0.01" min="0">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn" style="margin-top: 1rem;">Agregar Lote</button>
+                    </form>
                 </div>
-                <div>
-                    <label for="price">Precio</label>
-                    <input id="price" name="price" type="number" step="0.01" value="<%= product.price %>" />
-                </div>
-                <div>
-                    <label for="stock">Stock</label>
-                    <input id="stock" name="stock" type="number" value="<%= product.stock %>" />
-                </div>
-                <div>
-                    <label for="image">Nueva Imagen (opcional)</label>
-                    <input id="image" name="image" type="file" accept="image/*" />
-                    <% if (product.image) { %>
-                        <small>Imagen actual: <a href="<%= product.image %>" target="_blank">Ver</a></small>
-                    <% } %>
-                </div>
-                <button class="btn" type="submit">Guardar Cambios</button>
-                <a href="/dashboard" class="btn btn-cancel">Cancelar</a>
-            </form>
-        </section>
-    </div>
-</main>
-<%- include('partials/footer') %>
+            </section>
+        </div>
+    </main>
+    <%- include('partials/footer') %>

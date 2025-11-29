@@ -1,0 +1,65 @@
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+    <% if (users && users.length) { %>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Nombre
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Email
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Rol
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            Fecha de Creación</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <% users.forEach(function(user) { %>
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <span class="font-bold text-gray-800">
+                                        <%= user.name %>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-gray-600">
+                                    <%= user.email %>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <% let badgeClass='' ; let roleLabel='' ; switch(user.role) { case 'admin' :
+                                    badgeClass='bg-red-100 text-red-700' ; roleLabel='Administrador' ; break;
+                                    case 'cajero' : badgeClass='bg-blue-100 text-blue-700' ; roleLabel='Cajero' ; break;
+                                    case 'inventario' : badgeClass='bg-purple-100 text-purple-700' ;
+                                    roleLabel='Inventario' ; break; case 'user' : default:
+                                    badgeClass='bg-green-100 text-green-700' ; roleLabel='Cliente' ; break; } %>
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold <%= badgeClass %>">
+                                        <%= roleLabel %>
+                                    </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-sm text-gray-500">
+                                    <%= new Date(user.createdAt).toLocaleDateString('es-ES', { year: 'numeric' ,
+                                        month: 'long' , day: 'numeric' }) %>
+                                </span>
+                            </td>
+                        </tr>
+                        <% }); %>
+                </tbody>
+            </table>
+        </div>
+        <% } else { %>
+            <div class="p-12 text-center text-gray-400">
+                <i class="fas fa-users text-6xl mb-4 opacity-20"></i>
+                <p class="text-lg font-medium">No hay usuarios registrados</p>
+                <p class="text-sm">Crea el primer usuario usando el formulario de la izquierda</p>
+            </div>
+            <% } %>
+</div>

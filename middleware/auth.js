@@ -18,16 +18,16 @@ exports.protect = async (req, res, next) => {
     const authHeader = req.header('Authorization');
     const cookieToken = (req.cookies && req.cookies.token) ? req.cookies.token : undefined;
     let token = authHeader || cookieToken;
-    
+
     if (token) {
       if (token.startsWith('Bearer ')) {
         token = token.slice(7);
       }
-      
+
       try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findByPk(decoded.id);
-        
+
         if (user) {
           req.user = user;
           req.session.user = {
@@ -43,18 +43,18 @@ exports.protect = async (req, res, next) => {
         console.log('JWT verification failed:', jwtError.message);
       }
     }
-    
+
     // Fallback a sesión tradicional
     if (req.session.user) {
       req.user = req.session.user;
       return next();
     }
-    
+
     // Si es una petición AJAX/API, devolver JSON
     if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
       return res.status(401).json({ message: 'Authentication required' });
     }
-    
+
     // Si es una petición web normal, redirigir a login
     return res.redirect('/auth/login');
   } catch (err) {
@@ -68,14 +68,15 @@ exports.protect = async (req, res, next) => {
 
 exports.admin = (req, res, next) => {
   const user = req.user || req.session.user;
-  
+
   if (user && user.role === 'admin') {
     next();
   } else {
     if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
       return res.status(403).json({ message: 'Acceso de Administrador requerido' });
     }
-    return res.status(403).render('partials/error', { message: 'No tienes permiso para acceder a esta página.', user });
+    req.session.messages = [{ type: 'error', text: 'No tienes permiso para acceder a esta página.' }];
+    return res.redirect('/dashboard');
   }
 };
 
@@ -88,7 +89,8 @@ exports.cajero = (req, res, next) => {
     if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
       return res.status(403).json({ message: 'Acceso de Cajero requerido' });
     }
-    return res.status(403).render('partials/error', { message: 'No tienes permiso para acceder a esta página.', user });
+    req.session.messages = [{ type: 'error', text: 'No tienes permiso para acceder a esta página.' }];
+    return res.redirect('/dashboard');
   }
 };
 
@@ -101,7 +103,8 @@ exports.inventario = (req, res, next) => {
     if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
       return res.status(403).json({ message: 'Acceso de Inventario requerido' });
     }
-    return res.status(403).render('partials/error', { message: 'No tienes permiso para acceder a esta página.', user });
+    req.session.messages = [{ type: 'error', text: 'No tienes permiso para acceder a esta página.' }];
+    return res.redirect('/dashboard');
   }
 };
 
@@ -114,6 +117,7 @@ exports.adminOrInventario = (req, res, next) => {
     if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
       return res.status(403).json({ message: 'Acceso de Administrador o Inventario requerido' });
     }
-    return res.status(403).render('partials/error', { message: 'No tienes permiso para acceder a esta página.', user });
+    req.session.messages = [{ type: 'error', text: 'No tienes permiso para acceder a esta página.' }];
+    return res.redirect('/dashboard');
   }
 };

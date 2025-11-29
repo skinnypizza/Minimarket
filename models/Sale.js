@@ -1,6 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 
-class Sale extends Model {}
+class Sale extends Model { }
 
 module.exports = (sequelize) => {
   Sale.init({
@@ -18,10 +18,6 @@ module.exports = (sequelize) => {
       allowNull: false
     },
     cashReceived: {
-      type: DataTypes.DOUBLE,
-      allowNull: false
-    },
-    changeGiven: {
       type: DataTypes.DOUBLE,
       allowNull: false
     }

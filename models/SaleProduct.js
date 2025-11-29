@@ -1,6 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 
-class SaleProduct extends Model {}
+class SaleProduct extends Model { }
 
 module.exports = (sequelize) => {
   SaleProduct.init({
@@ -22,10 +22,6 @@ module.exports = (sequelize) => {
       allowNull: false
     },
     unitPrice: {
-      type: DataTypes.DOUBLE,
-      allowNull: false
-    },
-    totalPrice: {
       type: DataTypes.DOUBLE,
       allowNull: false
     }

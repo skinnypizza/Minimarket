@@ -21,8 +21,7 @@ router.post('/', protect, cajero, async (req, res) => {
     const sale = await Sale.create({
       userId,
       totalAmount,
-      cashReceived,
-      changeGiven
+      cashReceived
     }, { transaction: t });
 
     // 2. Procesar cada producto en el carrito
@@ -32,8 +31,7 @@ router.post('/', protect, cajero, async (req, res) => {
         saleId: sale.id,
         productId: item.id,
         quantity: item.quantity,
-        unitPrice: item.price,
-        totalPrice: item.quantity * item.price
+        unitPrice: item.price
       }, { transaction: t });
 
       // 3. Descontar el stock de los lotes (Batches)

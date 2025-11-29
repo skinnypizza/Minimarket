@@ -1,16 +1,277 @@
-<%- include('partials/pos_header') %>
+<!DOCTYPE html>
+<html lang="es">
 
-<main class="pos-container">
-    <div class="pos-left">
-        <%- include('partials/pos_reservations') %>
-        <%- include('partials/pos_product_search') %>
+<head>
+    <title>Caja - MAXMARKET</title>
+    <%- include('partials/head_tailwind') %>
+</head>
+
+<body class="bg-gray-100 h-screen overflow-hidden flex flex-col"
+    data-user='<%= JSON.stringify({id: user.id, name: user.name, email: user.email, role: user.role}) %>'>
+
+    <!-- POS Header -->
+    <header class="bg-gray-900 text-white px-6 py-3 flex justify-between items-center shadow-md shrink-0">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-brand-500 rounded-lg flex items-center justify-center font-bold text-xl">
+                <i class="fas fa-cash-register"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg leading-tight">Punto de Venta</h1>
+                <p class="text-xs text-gray-400">Cajero: <%= user.name %>
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-right mr-4">
+                <p class="text-xs text-gray-400">Fecha</p>
+                <p class="font-mono font-bold">
+                    <%= new Date().toLocaleDateString() %>
+                </p>
+            </div>
+            <a href="/auth/logout"
+                class="bg-gray-800 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium">
+                <i class="fas fa-sign-out-alt mr-2"></i> Salir
+            </a>
+        </div>
+    </header>
+
+    <!-- Main POS Layout -->
+    <main class="flex-1 flex overflow-hidden">
+
+        <!-- Left Column: Reservations + Search (42%) -->
+        <div class="w-[42%] flex flex-col border-r border-gray-200 bg-white">
+
+            <!-- Pending Reservations Section -->
+            <div class="border-b border-gray-200 p-4 bg-brand-50">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-bookmark text-brand-600"></i>
+                        Reservas Pendientes
+                    </h3>
+                    <button onclick="loadPOSReservations()"
+                        class="px-3 py-1.5 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors">
+                        <i class="fas fa-sync-alt mr-1"></i> Actualizar
+                    </button>
+                </div>
+                <div id="pos-reservations-list" class="max-h-64 overflow-y-auto space-y-2">
+                    <div class="text-center py-8 text-gray-400">
+                        <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                        <p class="text-sm">Cargando reservas...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="p-4 border-b border-gray-200 bg-gray-50">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></i>
+                    <input type="text" id="productSearch" placeholder="Escanear código de barras o buscar producto..."
+                        class="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 focus:border-brand-500 focus:ring-0 text-lg shadow-sm outline-none transition-all"
+                        autofocus>
+                </div>
+            </div>
+
+            <!-- Product Results -->
+            <div class="flex-1 overflow-y-auto p-4 bg-gray-50/50">
+                <div id="searchResults" class="grid grid-cols-2 gap-3">
+                    <div class="col-span-full text-center py-16 text-gray-400">
+                        <i class="fas fa-barcode text-5xl mb-3 opacity-20"></i>
+                        <p class="text-base">Escanea un producto o busca por nombre</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Current Sale (58%) -->
+        <div class="w-[58%] flex flex-col bg-white shadow-xl z-10">
+
+            <!-- Cart Header -->
+            <div class="p-4 bg-brand-600 text-white flex justify-between items-center shadow-sm">
+                <h2 class="font-bold text-lg"><i class="fas fa-shopping-cart mr-2"></i> Venta Actual</h2>
+                <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-mono"><span id="cartItemCount">0</span>
+                    items</span>
+            </div>
+
+            <!-- Cart Items List -->
+            <div id="cartItems" class="flex-1 overflow-y-auto p-3 space-y-2 bg-gray-50">
+                <div class="h-full flex flex-col items-center justify-center text-gray-400 opacity-50">
+                    <i class="fas fa-shopping-basket text-6xl mb-4"></i>
+                    <p>Carrito Vacío</p>
+                </div>
+            </div>
+
+            <!-- Totals & Actions -->
+            <div class="p-4 bg-gray-50 border-t border-gray-200 space-y-4">
+                <div class="flex justify-between items-end">
+                    <span class="text-gray-600 font-medium">Total a Pagar</span>
+                    <span class="text-4xl font-bold text-gray-900">Bs. <span id="totalAmount">0.00</span></span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="clearCart()"
+                        class="py-3 px-4 rounded-xl border-2 border-red-100 text-red-600 font-bold hover:bg-red-50 transition-colors">
+                        <i class="fas fa-trash-alt mr-2"></i> Cancelar
+                    </button>
+                    <button onclick="processSale()"
+                        class="py-3 px-4 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 shadow-lg shadow-brand-200 transition-transform active:scale-95">
+                        <i class="fas fa-check mr-2"></i> Cobrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
+            <div class="bg-gray-900 text-white p-6 text-center">
+                <h3 class="text-2xl font-bold">Procesar Pago</h3>
+                <p class="text-gray-400 text-sm mt-1">Total a cobrar</p>
+                <p class="text-4xl font-bold mt-2">Bs. <span id="modalTotal">0.00</span></p>
+            </div>
+
+            <div class="p-8 space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Efectivo Recibido</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Bs.</span>
+                        <input type="number" id="cashReceived"
+                            class="w-full pl-12 pr-4 py-4 text-2xl font-bold border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none"
+                            placeholder="0.00">
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <span class="font-bold text-gray-600">Cambio:</span>
+                    <span id="changeAmount" class="font-bold text-2xl text-brand-600">Bs. 0.00</span>
+                </div>
+
+                <button onclick="confirmSale()"
+                    class="w-full py-4 bg-brand-600 text-white rounded-xl font-bold text-lg shadow-xl hover:bg-brand-700 transition-transform active:scale-95">
+                    Confirmar Venta
+                </button>
+
+                <button onclick="closeModal()" class="w-full py-3 text-gray-500 font-medium hover:text-gray-700">
+                    Volver
+                </button>
+            </div>
+        </div>
     </div>
-    <div class="pos-right">
-        <%- include('partials/pos_cart') %>
-    </div>
-</main>
 
-<%- include('partials/pos_footer') %>
+    <script src="/js/cajero.js"></script>
+    <script>
+        // Reservation Management
+        async function loadPOSReservations() {
+            const container = document.getElementById('pos-reservations-list');
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-400">
+                    <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                    <p class="text-sm">Cargando reservas...</p>
+                </div>`;
 
-<!-- Incluir el script específico para la lógica del cajero -->
-<script src="/js/cajero.js"></script>
+            try {
+                const response = await fetch('/cart/all-pending');
+                const data = await response.json();
+
+                if (data.success && data.carts && data.carts.length > 0) {
+                    container.innerHTML = data.carts.map(cart => {
+                        const createdDate = new Date(cart.createdAt).toLocaleDateString('es-ES', {
+                            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                        });
+
+                        return `
+                            <div class="bg-white border-2 border-brand-100 rounded-xl p-3 hover:border-brand-300 transition-all">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <div class="font-bold text-brand-600 text-sm">#${cart.reservationNumber}</div>
+                                        <div class="text-xs text-gray-600">
+                                            <i class="fas fa-user mr-1"></i>${cart.user ? cart.user.name : 'Cliente'}
+                                        </div>
+                                        <div class="text-xs text-gray-400">${createdDate}</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-xs text-gray-500">${cart.items ? cart.items.length : 0} items</div>
+                                        <div class="font-bold text-brand-600">Bs. ${cart.totalAmount.toFixed(2)}</div>
+                                    </div>
+                                </div>
+                                <button onclick='importReservationToPOS(${JSON.stringify(cart)})' 
+                                    class="w-full mt-2 py-2 bg-brand-600 text-white rounded-lg text-sm font-bold hover:bg-brand-700 transition-colors">
+                                    <i class="fas fa-download mr-1"></i> Importar
+                                </button>
+                            </div>`;
+                    }).join('');
+                } else {
+                    container.innerHTML = `
+                        <div class="text-center py-8 text-gray-400">
+                            <i class="fas fa-inbox text-3xl mb-2 opacity-30"></i>
+                            <p class="text-sm">No hay reservas pendientes</p>
+                        </div>`;
+                }
+            } catch (err) {
+                console.error('Error loading reservations:', err);
+                container.innerHTML = `
+                    <div class="text-center py-8 text-red-500">
+                        <i class="fas fa-exclamation-circle text-2xl mb-2"></i>
+                        <p class="text-sm">Error al cargar reservas</p>
+                    </div>`;
+            }
+        }
+
+        async function importReservationToPOS(cart) {
+            if (!cart.items || cart.items.length === 0) {
+                alert('Esta reserva no tiene productos');
+                return;
+            }
+
+            const currentCart = window.cart || [];
+            if (currentCart.length > 0) {
+                if (!confirm('Esto reemplazará el carrito actual. ¿Continuar?')) {
+                    return;
+                }
+            }
+
+            // Clear and import
+            window.cart = [];
+            cart.items.forEach(item => {
+                if (item.product) {
+                    window.cart.push({
+                        id: item.product.id,
+                        name: item.product.name,
+                        price: item.unitPrice,
+                        quantity: item.quantity,
+                        totalStock: item.product.totalStock || 1000,
+                        image: item.product.image
+                    });
+                }
+            });
+
+            // Render the imported cart
+            window.renderCart();
+
+            // Mark as completed
+            try {
+                await fetch(`/cart/complete/${cart.id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                loadPOSReservations();
+                alert(`Reserva #${cart.reservationNumber} importada con ${cart.items.length} producto(s)`);
+            } catch (err) {
+                console.error('Error marking reservation as completed:', err);
+            }
+        }
+
+        // Auto-load reservations
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadPOSReservations);
+        } else {
+            loadPOSReservations();
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadPOSReservations, 30000);
+    </script>
+</body>
+
+</html>

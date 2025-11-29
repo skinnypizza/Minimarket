@@ -1,46 +1,84 @@
-<section class="product-list">
-    <h4>Productos</h4>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
     <% if (products && products.length) { %>
-        <table>
-            <thead>
-                <tr>
-                    <th>Imagen</th>
-                    <th>Nombre</th>
-                    <th>Precio</th>
-                    <th>Stock</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-            <% products.forEach(function(product) { %>
-                <tr>
-                    <td>
-                        <% if (product.image) { %>
-                            <img src="<%= product.image %>" alt="<%= product.name %>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
-                        <% } else { %>
-                            <div style="width: 50px; height: 50px; background: #f0f0f0; border-radius: 5px; display: flex; align-items: center; justify-content: center; color: #999;">
-                                Sin imagen
-                            </div>
-                        <% } %>
-                    </td>
-                    <td><%= product.name %></td>
-                    <td>$<%= product.price.toFixed(2) %></td>
-                    <td><%= product.totalStock %></td>
-                    <td>
-                        <% if (product.id) { %>
-                        <form class="delete-product-form" data-product-id="<%= product.id %>" style="display:inline" onsubmit="handleDelete(event)">
-                            <button class="btn" type="submit">Borrar</button>
-                        </form>
-                        <a href="/products/<%= product.id %>/edit" class="btn">Editar</a>
-                        <% } else { %>
-                            <span>ID no disponible</span>
-                        <% } %>
-                    </td>
-                </tr>
-            <% }); %>
-            </tbody>
-        </table>
-    <% } else { %>
-        <p>No products yet.</p>
-    <% } %>
-</section>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Imagen
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Nombre
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Precio
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Stock
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <% products.forEach(function(product) { %>
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4">
+                                <% if (product.image) { %>
+                                    <img src="<%= product.image %>" alt="<%= product.name %>"
+                                        class="w-14 h-14 object-cover rounded-lg border-2 border-gray-100">
+                                    <% } else { %>
+                                        <div
+                                            class="w-14 h-14 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-gray-200">
+                                            <i class="fas fa-image text-gray-400 text-xl"></i>
+                                        </div>
+                                        <% } %>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="font-bold text-gray-800">
+                                    <%= product.name %>
+                                </span>
+                                <% if (product.description) { %>
+                                    <p class="text-sm text-gray-500 truncate max-w-xs">
+                                        <%= product.description %>
+                                    </p>
+                                    <% } %>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="font-bold text-brand-600">Bs. <%= product.price.toFixed(2) %></span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <% const stock=product.totalStock || 0; %>
+                                    <span
+                                        class="px-3 py-1 rounded-full text-xs font-bold <%= stock > 10 ? 'bg-green-100 text-green-700' : stock > 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700' %>">
+                                        <%= stock %> unidades
+                                    </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <% if (product.id) { %>
+                                        <a href="/products/<%= product.id %>/edit"
+                                            class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-medium hover:bg-blue-100 transition-colors text-sm">
+                                            <i class="fas fa-edit mr-1"></i> Editar
+                                        </a>
+                                        <form class="delete-product-form inline-block"
+                                            data-product-id="<%= product.id %>" onsubmit="handleDelete(event)">
+                                            <button type="submit"
+                                                class="px-4 py-2 bg-red-50 text-red-600 rounded-lg font-medium hover:bg-red-100 transition-colors text-sm">
+                                                <i class="fas fa-trash-alt mr-1"></i> Borrar
+                                            </button>
+                                        </form>
+                                        <% } else { %>
+                                            <span class="text-gray-400 text-sm">ID no disponible</span>
+                                            <% } %>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }); %>
+                </tbody>
+            </table>
+        </div>
+        <% } else { %>
+            <div class="p-12 text-center text-gray-400">
+                <i class="fas fa-box-open text-6xl mb-4 opacity-20"></i>
+                <p class="text-lg font-medium">No hay productos registrados</p>
+                <p class="text-sm">Crea tu primer producto usando el formulario de arriba</p>
+            </div>
+            <% } %>
+</div>

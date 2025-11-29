@@ -43,8 +43,8 @@ User.hasMany(Sale, { foreignKey: 'userId' });
 Sale.belongsTo(User, { foreignKey: 'userId' });
 
 // Product - Batch (One-to-Many)
-Product.hasMany(Batch, { as: 'batches', foreignKey: 'productId' });
-Batch.belongsTo(Product, { foreignKey: 'productId' });
+Product.hasMany(Batch, { as: 'batches', foreignKey: 'productId', onDelete: 'CASCADE' });
+Batch.belongsTo(Product, { foreignKey: 'productId', onDelete: 'CASCADE' });
 
 // Sale - Product (Many-to-Many through SaleProduct)
 Product.belongsToMany(Sale, {
