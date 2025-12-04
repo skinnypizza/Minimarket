@@ -70,29 +70,8 @@ app.use('/products', require('./routes/products'));
 app.use('/api', require('./routes/api'));
 app.use('/cart', require('./routes/cart'));
 app.use('/api/sales', require('./routes/sales'));
-
-// KPI data endpoint - Validated with interview data
-app.get('/api/kpis', (req, res) => {
-  // Mock data validated with interview insights
-  const kpis = {
-    salesOverTime: {
-      labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
-      // Sales reflect more activity towards the weekend
-      data: [1850, 1700, 2100, 2300, 2800, 3500, 3100] 
-    },
-    topSellingProducts: {
-      // Products are generic daily items as mentioned by the frequent client
-      labels: ['Agua Embotellada 600ml', 'Galletas de Soda', 'Jabón de Tocador', 'Arroz (1kg)', 'Aceite Vegetal (1L)'],
-      data: [180, 155, 120, 90, 75] // Units sold
-    },
-    lowStockProducts: {
-      // Reflects specific products that a customer might not find
-      labels: ['Atún en lata', 'Mayonesa (200g)', 'Café Instantáneo', 'Leche Deslactosada', 'Pan Molde'],
-      data: [8, 5, 9, 4, 6] // Units in stock, reflecting the issue of finding specific items
-    }
-  };
-  res.json(kpis);
-});
+app.use('/users', require('./routes/users'));
+app.use('/reports', require('./routes/reports'));
 
 const PORT = process.env.PORT || 3000;
 

@@ -17,7 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function initCart() {
     try {
-        const response = await fetch('/cart/my-cart');
+        const response = await fetch('/cart/my-cart', {
+            headers: { 'Accept': 'application/json' }
+        });
         const data = await response.json();
         if (data.success && data.cart && data.cart.items) {
             cart = data.cart.items.map(item => ({
@@ -144,7 +146,10 @@ async function saveReservation() {
         const items = cart.map(item => ({ productId: item.productId, quantity: item.quantity }));
         const response = await fetch('/cart/update', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
             body: JSON.stringify({ items })
         });
         const data = await response.json();
@@ -198,6 +203,16 @@ function switchTab(tab) {
     }
 }
 
+function toggleDesktopHistory() {
+    const panel = document.getElementById('desktopHistoryPanel');
+    if (panel) {
+        panel.classList.toggle('translate-x-full');
+        if (!panel.classList.contains('translate-x-full')) {
+            loadReservations();
+        }
+    }
+}
+
 function filterByCategory(category) {
     // Update active button
     document.querySelectorAll('.category-btn').forEach(btn => {
@@ -238,50 +253,51 @@ function filterProducts(query) {
 // --- History ---
 
 async function loadReservations() {
-    const container = document.getElementById('mobileReservationsList');
-    if (!container) return;
+    const mobileContainer = document.getElementById('mobileReservationsList');
+    const desktopContainer = document.getElementById('desktopReservationsList');
 
     try {
-        const response = await fetch('/cart/history');
+        const response = await fetch('/cart/history', {
+            headers: { 'Accept': 'application/json' }
+        });
         const data = await response.json();
 
-        if (data.success && data.carts.length > 0) {
-            container.innerHTML = data.carts.map(cart => `
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-3">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <span class="text-xs font-bold text-gray-400">#${cart.reservationNumber}</span>
-                            <h4 class="font-bold text-gray-800">Reserva</h4>
+        const html = data.success && data.carts.length > 0 ? data.carts.map(cart => `
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <span class="text-xs font-bold text-gray-400">#${cart.reservationNumber}</span>
+                        <h4 class="font-bold text-gray-800">Reserva</h4>
+                    </div>
+                    <span class="px-2 py-1 rounded-full text-[10px] font-bold ${getStatusColor(cart.status)}">
+                        ${cart.status === 'pending' ? 'Pendiente' : cart.status === 'completed' ? 'Completada' : 'Cancelada'}
+                    </span>
+                </div>
+                <div class="space-y-1 mb-3">
+                    ${cart.items.slice(0, 2).map(i => `
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">${i.quantity}x ${i.product ? i.product.name : 'Item'}</span>
+                            <span class="font-medium">Bs. ${i.totalPrice.toFixed(2)}</span>
                         </div>
-                        <span class="px-2 py-1 rounded-full text-[10px] font-bold ${getStatusColor(cart.status)}">
-                            ${cart.status === 'pending' ? 'Pendiente' : cart.status === 'completed' ? 'Completada' : 'Cancelada'}
-                        </span>
-                    </div>
-                    <div class="space-y-1 mb-3">
-                        ${cart.items.slice(0, 2).map(i => `
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">${i.quantity}x ${i.product ? i.product.name : 'Item'}</span>
-                                <span class="font-medium">Bs. ${i.totalPrice.toFixed(2)}</span>
-                            </div>
-                        `).join('')}
-                        ${cart.items.length > 2 ? `<span class="text-xs text-gray-400">+${cart.items.length - 2} más...</span>` : ''}
-                    </div>
-                    <div class="flex justify-between items-center pt-2 border-t border-gray-50">
-                        <span class="font-bold text-brand-600">Total: Bs. ${cart.totalAmount.toFixed(2)}</span>
-                        ${cart.status === 'pending' ? `
-                            <button onclick="cancelReservation(${cart.id})" class="text-red-500 text-xs font-medium hover:underline">Cancelar</button>
-                        ` : ''}
-                    </div>
+                    `).join('')}
+                    ${cart.items.length > 2 ? `<span class="text-xs text-gray-400">+${cart.items.length - 2} más...</span>` : ''}
                 </div>
-            `).join('');
-        } else {
-            container.innerHTML = `
-                <div class="flex flex-col items-center justify-center h-64 text-gray-400">
-                    <i class="fas fa-history text-4xl mb-2 opacity-30"></i>
-                    <p>No hay historial</p>
+                <div class="flex justify-between items-center pt-2 border-t border-gray-50">
+                    <span class="font-bold text-brand-600">Total: Bs. ${cart.totalAmount.toFixed(2)}</span>
+                    ${cart.status === 'pending' ? `
+                        <button onclick="cancelReservation(${cart.id})" class="text-red-500 text-xs font-medium hover:underline">Cancelar</button>
+                    ` : ''}
                 </div>
-            `;
-        }
+            </div>
+        `).join('') : `
+            <div class="flex flex-col items-center justify-center h-64 text-gray-400">
+                <i class="fas fa-history text-4xl mb-2 opacity-30"></i>
+                <p>No hay historial</p>
+            </div>
+        `;
+
+        if (mobileContainer) mobileContainer.innerHTML = html;
+        if (desktopContainer) desktopContainer.innerHTML = html;
     } catch (err) {
         console.error(err);
     }
@@ -299,7 +315,10 @@ function getStatusColor(status) {
 async function cancelReservation(id) {
     if (!confirm('¿Cancelar esta reserva?')) return;
     try {
-        const res = await fetch(`/cart/cancel/${id}`, { method: 'POST' });
+        const res = await fetch(`/cart/cancel/${id}`, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json' }
+        });
         const data = await res.json();
         if (data.success) {
             showToast('Reserva cancelada', 'success');

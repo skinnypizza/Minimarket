@@ -1,20 +1,220 @@
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <h5 class="text-sm font-bold text-gray-500 mb-4 uppercase tracking-wide">Ventas de la Semana</h5>
-        <div class="h-64">
+<!-- KPI Dashboard Header & Filters -->
+<div class="mb-8">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Dashboard Gerencial</h2>
+            <p class="text-gray-500 text-sm">Análisis de rendimiento e inventario en tiempo real</p>
+        </div>
+
+        <!-- Period Filter -->
+        <div class="bg-white p-1.5 rounded-xl border border-gray-200 shadow-sm flex">
+            <button
+                class="period-btn px-4 py-1.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                data-period="today">Hoy</button>
+            <button
+                class="period-btn px-4 py-1.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                data-period="week">Semana</button>
+            <button
+                class="period-btn px-4 py-1.5 rounded-lg text-sm font-medium bg-brand-50 text-brand-700 shadow-sm transition-colors"
+                data-period="month">Mes</button>
+            <button
+                class="period-btn px-4 py-1.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                data-period="quarter">Trimestre</button>
+        </div>
+    </div>
+
+    <!-- Custom Date Filter (Collapsible) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-6">
+        <form id="kpiFilterForm" class="flex flex-col md:flex-row gap-4 items-end">
+            <div class="flex-1 w-full">
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Desde</label>
+                <input type="date" id="startDate" name="startDate"
+                    class="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+            </div>
+            <div class="flex-1 w-full">
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Hasta</label>
+                <input type="date" id="endDate" name="endDate"
+                    class="w-full px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-brand-500 outline-none transition-all">
+            </div>
+            <button type="submit"
+                class="w-full md:w-auto px-6 py-2 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-900 transition-colors flex items-center justify-center gap-2">
+                <i class="fas fa-filter"></i> Aplicar Rango
+            </button>
+        </form>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <!-- Total Sales -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
+            <div
+                class="absolute right-0 top-0 w-24 h-24 bg-green-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110">
+            </div>
+            <div class="relative z-10">
+                <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Ventas Totales</p>
+                <h3 class="text-2xl font-bold text-gray-900" id="kpiTotalSales">Bs. 0.00</h3>
+                <p class="text-green-600 text-xs font-medium mt-2 flex items-center gap-1">
+                    <i class="fas fa-arrow-up"></i> <span id="kpiSalesGrowth">--</span> vs periodo anterior
+                </p>
+            </div>
+            <div class="absolute right-4 top-4 text-green-500 bg-green-100 p-2 rounded-lg">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+        </div>
+
+        <!-- Transactions -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
+            <div
+                class="absolute right-0 top-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110">
+            </div>
+            <div class="relative z-10">
+                <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Transacciones</p>
+                <h3 class="text-2xl font-bold text-gray-900" id="kpiTotalTransactions">0</h3>
+                <p class="text-blue-600 text-xs font-medium mt-2 flex items-center gap-1">
+                    <i class="fas fa-receipt"></i> Ticket Prom: <span id="kpiAvgTicket">Bs. 0</span>
+                </p>
+            </div>
+            <div class="absolute right-4 top-4 text-blue-500 bg-blue-100 p-2 rounded-lg">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+        </div>
+
+        <!-- Inventory Value -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
+            <div
+                class="absolute right-0 top-0 w-24 h-24 bg-purple-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110">
+            </div>
+            <div class="relative z-10">
+                <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Valor Inventario</p>
+                <h3 class="text-2xl font-bold text-gray-900" id="kpiInventoryValue">Bs. 0.00</h3>
+                <p class="text-purple-600 text-xs font-medium mt-2 flex items-center gap-1">
+                    <i class="fas fa-boxes"></i> <span id="kpiTotalStock">0</span> unidades
+                </p>
+            </div>
+            <div class="absolute right-4 top-4 text-purple-500 bg-purple-100 p-2 rounded-lg">
+                <i class="fas fa-warehouse"></i>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
+            <div
+                class="absolute right-0 top-0 w-24 h-24 bg-orange-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110">
+            </div>
+            <div class="relative z-10">
+                <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Alertas Stock</p>
+                <h3 class="text-2xl font-bold text-gray-900" id="kpiLowStockCount">0</h3>
+                <p class="text-red-500 text-xs font-medium mt-2 flex items-center gap-1">
+                    <i class="fas fa-exclamation-triangle"></i> <span id="kpiOutOfStockCount">0</span> agotados
+                </p>
+            </div>
+            <div class="absolute right-4 top-4 text-orange-500 bg-orange-100 p-2 rounded-lg">
+                <i class="fas fa-bell"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Charts Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Sales Trend (Wide) -->
+    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h5 class="text-sm font-bold text-gray-800 uppercase tracking-wide">Tendencia de Ventas</h5>
+            <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-md" id="salesChartPeriodLabel">Últimos 30
+                días</span>
+        </div>
+        <div class="h-72">
             <canvas id="salesOverTimeChart"></canvas>
         </div>
     </div>
+
+    <!-- Sales by Category -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <h5 class="text-sm font-bold text-gray-500 mb-4 uppercase tracking-wide">Productos Más Vendidos</h5>
+        <h5 class="text-sm font-bold text-gray-800 mb-6 uppercase tracking-wide">Ventas por Categoría</h5>
+        <div class="h-48 relative">
+            <canvas id="salesByCategoryChart"></canvas>
+        </div>
+        <div class="mt-4 space-y-2" id="categoryLegend">
+            <!-- Legend items will be injected here -->
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Top Products -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h5 class="text-sm font-bold text-gray-800 mb-6 uppercase tracking-wide">Top 5 Productos Más Vendidos</h5>
         <div class="h-64">
             <canvas id="topSellingProductsChart"></canvas>
         </div>
     </div>
+
+    <!-- Inventory Rotation -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <h5 class="text-sm font-bold text-gray-500 mb-4 uppercase tracking-wide">Bajo Stock</h5>
-        <div class="h-64">
-            <canvas id="lowStockProductsChart"></canvas>
+        <h5 class="text-sm font-bold text-gray-800 mb-6 uppercase tracking-wide">Índice de Rotación de Inventario</h5>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="text-xs text-gray-500 uppercase bg-gray-50">
+                    <tr>
+                        <th class="px-3 py-2 rounded-l-lg">Producto</th>
+                        <th class="px-3 py-2 text-center">Rotación</th>
+                        <th class="px-3 py-2 text-center rounded-r-lg">Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="rotationTableBody" class="text-gray-600">
+                    <!-- Rows injected via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- FIFO/LIFO Analysis & Alerts -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- FIFO/LIFO Comparison -->
+    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h5 class="text-sm font-bold text-gray-800 uppercase tracking-wide">Valoración de Inventario (FIFO vs LIFO)
+            </h5>
+            <div class="flex gap-2 text-xs">
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span> FIFO</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                    LIFO</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                <p class="text-blue-600 text-xs font-bold uppercase">Valor FIFO</p>
+                <h4 class="text-xl font-bold text-blue-900" id="fifoTotalValue">Bs. 0.00</h4>
+                <p class="text-xs text-blue-400 mt-1">Primero en entrar, primero en salir</p>
+            </div>
+            <div class="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                <p class="text-purple-600 text-xs font-bold uppercase">Valor LIFO</p>
+                <h4 class="text-xl font-bold text-purple-900" id="lifoTotalValue">Bs. 0.00</h4>
+                <p class="text-xs text-purple-400 mt-1">Último en entrar, primero en salir</p>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <p class="text-gray-500 text-xs font-bold uppercase">Diferencia</p>
+                <h4 class="text-xl font-bold text-gray-800" id="fifoLifoDiff">Bs. 0.00</h4>
+                <p class="text-xs text-gray-400 mt-1">Impacto en valoración</p>
+            </div>
+        </div>
+
+        <div class="h-48">
+            <canvas id="fifoLifoChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Stock Alerts List -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h5 class="text-sm font-bold text-red-600 mb-4 uppercase tracking-wide flex items-center gap-2">
+            <i class="fas fa-exclamation-circle"></i> Alertas Críticas
+        </h5>
+        <div class="space-y-3" id="alertsList">
+            <!-- Alerts injected via JS -->
+            <div class="text-center text-gray-400 py-4 text-sm">Cargando alertas...</div>
         </div>
     </div>
 </div>

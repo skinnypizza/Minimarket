@@ -79,6 +79,9 @@
             </div>
             <div class="flex items-center gap-6">
                 <span class="text-brand-100">Hola, <%= user.name %></span>
+                <button onclick="toggleDesktopHistory()" class="relative p-2 hover:bg-brand-700 rounded-full transition" title="Historial de Reservas">
+                    <i class="fas fa-history text-xl"></i>
+                </button>
                 <button onclick="toggleCart()" class="relative p-2 hover:bg-brand-700 rounded-full transition">
                     <i class="fas fa-shopping-cart text-xl"></i>
                     <span id="desktopCartCount"
@@ -231,8 +234,8 @@
             </button>
             <a href="/auth/logout"
                 class="bottom-nav-item flex flex-col items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
-                <i class="fas fa-user text-xl mb-1"></i>
-                <span class="text-[10px] font-medium">Perfil</span>
+                <i class="fas fa-sign-out-alt text-xl mb-1"></i>
+                <span class="text-[10px] font-medium">Salir</span>
             </a>
         </div>
     </nav>
@@ -263,6 +266,25 @@
                     class="w-full py-3.5 bg-brand-600 text-white rounded-xl font-bold shadow-lg shadow-brand-200 active:scale-95 transition-all disabled:opacity-50">
                     Confirmar Reserva
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop History Panel -->
+    <div id="desktopHistoryPanel"
+        class="hidden md:block fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="toggleDesktopHistory()"></div>
+        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl flex flex-col">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-white z-10">
+                <h2 class="text-lg font-bold text-gray-800">Historial de Reservas</h2>
+                <button onclick="toggleDesktopHistory()"
+                    class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div id="desktopReservationsList" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                <!-- Reservations injected here -->
             </div>
         </div>
     </div>

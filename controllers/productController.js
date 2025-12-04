@@ -5,7 +5,7 @@ const productController = {
     createProduct: async (req, res) => {
         const t = await sequelize.transaction();
         try {
-            const { name, description, price, stock } = req.body;
+            const { name, description, price, stock, category } = req.body;
             const imagePath = req.file ? `/img/products/${req.file.filename}` : null;
 
             // Basic Validation
@@ -24,6 +24,7 @@ const productController = {
                 name,
                 description,
                 price: sellingPrice,
+                category: category || 'General',
                 image: imagePath
             }, { transaction: t });
 
@@ -37,7 +38,9 @@ const productController = {
                 }, { transaction: t });
             }
 
+            console.log('Committing transaction...');
             await t.commit();
+            console.log('Transaction committed.');
             req.session.messages = [{ type: 'success', text: 'Producto creado exitosamente.' }];
             res.redirect('/dashboard');
         } catch (err) {

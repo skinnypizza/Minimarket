@@ -5,6 +5,7 @@
     <title>Inventario - MAXMARKET</title>
     <%- include('partials/head_tailwind') %>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="/js/product-management.js"></script>
 </head>
 
 <body class="bg-gray-50">
@@ -90,7 +91,9 @@
 
                     <div id="create" class="admin-section-content hidden space-y-6">
                         <h2 class="text-2xl font-bold text-gray-800 mb-4">Agregar Nuevo Producto</h2>
-                        <%- include('partials/create_product_section') %>
+                        <div class="max-w-lg mx-auto">
+                            <%- include('partials/create_product_section') %>
+                        </div>
                     </div>
 
                     <div id="products" class="admin-section-content hidden space-y-6">
@@ -162,33 +165,8 @@
                 switchSection(link.dataset.target);
             });
         });
-
-        // KPI Charts Initialization (Reusing existing logic)
-        document.addEventListener('DOMContentLoaded', () => {
-            fetch('/api/kpis')
-                .then(res => res.json())
-                .then(kpis => {
-                    if (document.getElementById('salesOverTimeChart')) {
-                        new Chart(document.getElementById('salesOverTimeChart'), {
-                            type: 'line',
-                            data: {
-                                labels: kpis.salesOverTime.labels,
-                                datasets: [{
-                                    label: 'Ventas ($)',
-                                    data: kpis.salesOverTime.data,
-                                    borderColor: '#16a34a',
-                                    backgroundColor: 'rgba(22, 163, 74, 0.1)',
-                                    fill: true,
-                                    tension: 0.4
-                                }]
-                            },
-                            options: { responsive: true, maintainAspectRatio: false }
-                        });
-                    }
-                    // Add other charts similarly...
-                });
-        });
     </script>
+    <script src="/js/kpi-charts.js"></script>
 
     <style>
         .sidebar-link.active {

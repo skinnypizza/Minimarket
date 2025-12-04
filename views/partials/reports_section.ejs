@@ -1,0 +1,128 @@
+<!-- Reports Section - Mobile First Design -->
+<div class="space-y-6">
+
+    <!-- Report Type Selection -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-file-invoice text-brand-600"></i>
+            Generador de Reportes
+        </h3>
+
+        <!-- Date Type Toggle -->
+        <div class="flex flex-col sm:flex-row gap-3 mb-6">
+            <button type="button" id="singleDateBtn"
+                class="flex-1 py-3 px-4 rounded-xl border-2 border-brand-500 bg-brand-50 text-brand-700 font-semibold transition-all flex items-center justify-center gap-2">
+                <i class="fas fa-calendar-day"></i>
+                <span>Un día</span>
+            </button>
+            <button type="button" id="rangeDateBtn"
+                class="flex-1 py-3 px-4 rounded-xl border-2 border-gray-200 bg-gray-50 text-gray-600 font-semibold transition-all hover:border-gray-300 flex items-center justify-center gap-2">
+                <i class="fas fa-calendar-week"></i>
+                <span>Rango de fechas</span>
+            </button>
+        </div>
+
+        <!-- Date Inputs -->
+        <form id="reportForm" class="space-y-4">
+            <!-- Single Date -->
+            <div id="singleDateInput">
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Fecha del Reporte</label>
+                <input type="date" id="reportDate" name="reportDate"
+                    class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-gray-700">
+            </div>
+
+            <!-- Date Range (hidden by default) -->
+            <div id="rangeDateInput" class="hidden">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Fecha Inicio</label>
+                        <input type="date" id="reportStartDate" name="reportStartDate"
+                            class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-gray-700">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Fecha Fin</label>
+                        <input type="date" id="reportEndDate" name="reportEndDate"
+                            class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-gray-700">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Button -->
+            <button type="submit" id="previewBtn"
+                class="w-full py-3 px-6 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition-all flex items-center justify-center gap-2">
+                <i class="fas fa-eye"></i>
+                Ver Vista Previa
+            </button>
+        </form>
+    </div>
+
+    <!-- KPI Preview Cards -->
+    <div id="kpiPreview" class="hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">Vista Previa del Período</h4>
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Total Sales -->
+                <div class="bg-gradient-to-br from-brand-50 to-brand-100 rounded-xl p-4 text-center">
+                    <div class="text-2xl lg:text-3xl font-bold text-brand-700" id="kpiTotalSales">$0</div>
+                    <div class="text-xs font-semibold text-brand-600 uppercase mt-1">Total Ventas</div>
+                </div>
+
+                <!-- Transactions -->
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 text-center">
+                    <div class="text-2xl lg:text-3xl font-bold text-blue-700" id="kpiTransactions">0</div>
+                    <div class="text-xs font-semibold text-blue-600 uppercase mt-1">Transacciones</div>
+                </div>
+
+                <!-- Average Ticket -->
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 text-center">
+                    <div class="text-2xl lg:text-3xl font-bold text-purple-700" id="kpiAvgTicket">$0</div>
+                    <div class="text-xs font-semibold text-purple-600 uppercase mt-1">Ticket Promedio</div>
+                </div>
+
+                <!-- Products Sold -->
+                <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 text-center">
+                    <div class="text-2xl lg:text-3xl font-bold text-orange-700" id="kpiProducts">0</div>
+                    <div class="text-xs font-semibold text-orange-600 uppercase mt-1">Productos</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Buttons -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+            <button type="button" id="downloadPdfBtn"
+                class="py-4 px-6 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-3 shadow-lg shadow-red-500/25">
+                <i class="fas fa-file-pdf text-xl"></i>
+                <span>Descargar PDF</span>
+            </button>
+            <button type="button" id="downloadCsvBtn"
+                class="py-4 px-6 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-3 shadow-lg shadow-emerald-500/25">
+                <i class="fas fa-file-csv text-xl"></i>
+                <span>Descargar CSV</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="reportLoading" class="hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+            <div class="animate-spin w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full mx-auto mb-4">
+            </div>
+            <p class="text-gray-600 font-medium">Generando reporte...</p>
+        </div>
+    </div>
+
+    <!-- No Data State -->
+    <div id="reportNoData" class="hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-inbox text-gray-400 text-2xl"></i>
+            </div>
+            <h4 class="text-lg font-bold text-gray-700 mb-2">Sin datos</h4>
+            <p class="text-gray-500">No se encontraron ventas para el período seleccionado.</p>
+        </div>
+    </div>
+
+</div>
+
+<script src="/js/reports.js"></script>

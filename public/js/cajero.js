@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.processSale = () => {
         const total = calculateTotal();
         if (window.cart.length === 0) {
-            alert('El carrito está vacío.');
+            showToast('El carrito está vacío.', 'error');
             return;
         }
         modalTotalEl.textContent = total.toFixed(2);
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalAmount = calculateTotal();
 
         if (cashReceived < totalAmount) {
-            alert('El efectivo recibido no puede ser menor que el total a pagar.');
+            showToast('El efectivo recibido no puede ser menor que el total a pagar.', 'error');
             return;
         }
 
@@ -82,12 +82,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(errorData.message || 'Error al registrar la venta.');
             }
 
-            alert('¡Venta registrada con éxito!');
+            showToast('¡Venta registrada con éxito!', 'success');
             window.closeModal();
             window.clearCart();
 
         } catch (error) {
-            alert(`Error: ${error.message}`);
+            showToast(`Error: ${error.message}`, 'error');
         }
     };
 
@@ -179,15 +179,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (existingProduct.quantity < availableStock) {
                 existingProduct.quantity++;
             } else {
-                alert('Stock insuficiente');
+                showToast('Stock insuficiente', 'error');
                 return;
             }
         } else {
             window.cart.push({ ...product, quantity: 1 });
         }
-        render
-
-        Cart();
+        renderCart();
     };
 
     window.updateQuantity = (index, quantity) => {
@@ -195,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const availableStock = product.totalStock || product.totalStock === 0 ? product.totalStock : 1000;
 
         if (quantity > availableStock) {
-            alert(`Stock máximo para ${product.name} es ${availableStock}.`);
+            showToast(`Stock máximo para ${product.name} es ${availableStock}.`, 'warning');
             return;
         }
         if (quantity < 1) {

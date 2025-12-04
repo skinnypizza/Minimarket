@@ -12,6 +12,8 @@
                         </th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                             Fecha de Creación</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
@@ -49,6 +51,18 @@
                                     <%= new Date(user.createdAt).toLocaleDateString('es-ES', { year: 'numeric' ,
                                         month: 'long' , day: 'numeric' }) %>
                                 </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <button onclick="handleEditUser(<%= user.id %>)"
+                                        class="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
+                                        <i class="fas fa-edit mr-1"></i> Editar
+                                    </button>
+                                    <button onclick="handleDeleteUser(<%= user.id %>, '<%= user.name %>')"
+                                        class="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors">
+                                        <i class="fas fa-trash-alt mr-1"></i> Eliminar
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         <% }); %>

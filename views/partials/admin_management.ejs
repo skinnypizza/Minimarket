@@ -1,4 +1,4 @@
-<div class="grid lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-1">
         <h3 class="text-xl font-bold text-gray-800 mb-4">Crear Usuario</h3>
         <%- include('create_user') %>
@@ -8,3 +8,59 @@
         <%- include('user_list') %>
     </div>
 </div>
+
+<!-- Edit User Modal -->
+<div id="editUserModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+        <div class="bg-brand-600 text-white p-6">
+            <h3 class="text-2xl font-bold">Editar Usuario</h3>
+        </div>
+
+        <form onsubmit="saveEditedUser(event)" class="p-6 space-y-4">
+            <input type="hidden" id="editUserId">
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Nombre</label>
+                <input type="text" id="editUserName" required
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none">
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Email</label>
+                <input type="email" id="editUserEmail" required
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none">
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Rol</label>
+                <select id="editUserRole" required
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none">
+                    <option value="user">Cliente</option>
+                    <option value="cajero">Cajero</option>
+                    <option value="inventario">Inventario</option>
+                    <option value="admin">Administrador</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Nueva Contraseña (opcional)</label>
+                <input type="password" id="editUserPassword"
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none"
+                    placeholder="Dejar en blanco para mantener la actual">
+            </div>
+
+            <div class="flex gap-3 pt-4">
+                <button type="button" onclick="closeEditModal()"
+                    class="flex-1 py-3 border-2 border-gray-200 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-colors">
+                    Cancelar
+                </button>
+                <button type="submit"
+                    class="flex-1 py-3 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition-colors">
+                    Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="/js/user-management.js"></script>

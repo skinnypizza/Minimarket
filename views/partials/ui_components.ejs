@@ -1,0 +1,30 @@
+<!-- Toast Container -->
+<div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+    <!-- Toasts will be injected here -->
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmation-modal"
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-200">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-200"
+        id="confirmation-modal-content">
+        <div class="p-6 text-center">
+            <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-exclamation-triangle text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2" id="confirm-title">Confirmar Acción</h3>
+            <p class="text-gray-500 mb-6" id="confirm-message">¿Estás seguro de que deseas realizar esta acción?</p>
+
+            <div class="flex gap-3">
+                <button id="confirm-cancel-btn"
+                    class="flex-1 py-3 border-2 border-gray-200 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-colors">
+                    Cancelar
+                </button>
+                <button id="confirm-ok-btn"
+                    class="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors shadow-lg shadow-red-200">
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
